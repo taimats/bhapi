@@ -121,6 +121,45 @@ func NewChartsFromBook(book *Book) []*Chart {
 	return charts
 }
 
+func UpdateChartsFromBook(book *Book) []*Chart {
+	year := book.CreatedAt.Year()
+	month := int(book.CreatedAt.Month())
+
+	chartPrice := &Chart{
+		Label:      ChartPrice,
+		Year:       year,
+		Month:      month,
+		Data:       book.Price,
+		AuthUserId: book.AuthUserId,
+		BookId:     book.ID,
+		CreatedAt:  book.CreatedAt,
+	}
+
+	chartVolume := &Chart{
+		Label:      ChartVolumes,
+		Year:       year,
+		Month:      month,
+		Data:       1,
+		AuthUserId: book.AuthUserId,
+		BookId:     book.ID,
+		CreatedAt:  book.CreatedAt,
+	}
+
+	chartPage := &Chart{
+		Label:      ChartPages,
+		Year:       year,
+		Month:      month,
+		Data:       book.Page,
+		AuthUserId: book.AuthUserId,
+		BookId:     book.ID,
+		CreatedAt:  book.CreatedAt,
+	}
+
+	charts := []*Chart{chartPrice, chartVolume, chartPage}
+
+	return charts
+}
+
 func NewRecordFromBooks(books []*Book) *Record {
 	record := new(Record)
 

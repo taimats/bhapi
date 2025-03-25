@@ -38,7 +38,7 @@ func (sc *Shelf) GetShelf(ctx context.Context, authUserId string) ([]*domain.Boo
 }
 
 func (sc *Shelf) UpdateShelf(ctx context.Context, book *domain.Book) error {
-	err := sc.sr.UpdateBook(ctx, book)
+	err := sc.sr.UpdateBookWithCharts(ctx, book)
 	if err != nil {
 		return err
 	}

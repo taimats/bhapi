@@ -71,6 +71,7 @@ func TestUpdateShelf(t *testing.T) {
 	sut := controller.NewShelf(sr)
 
 	book := &domain.Book{
+		ID:         int64(1),
 		ISBN10:     "4167110121",
 		ImageURL:   "http://books.google.com/books/content?id=TL3APAAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
 		Title:      "容疑者Xの献身",
@@ -81,7 +82,13 @@ func TestUpdateShelf(t *testing.T) {
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 	}
 
+	charts := domain.NewChartsFromBook(book)
+	for _, c := range charts {
+		c.BookId = book.ID
+	}
+
 	testutils.InsertTestData(t, db, ctx, book)
+	testutils.InsertTestData(t, db, ctx, charts...)
 
 	updatedBook := &domain.Book{
 		ID:         int64(1),

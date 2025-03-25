@@ -75,9 +75,10 @@ func (sr *Shelf) CreateBookWithCharts(ctx context.Context, book *domain.Book, ch
 	return nil
 }
 
-// 本の更新時（チャートの更新は不要）
-func (sr *Shelf) UpdateBook(ctx context.Context, book *domain.Book) error {
-	book.UpdatedAt = sr.cl.Now()
+// 本の更新とチャートの更新を同時に行う
+func (sr *Shelf) UpdateBookWithCharts(ctx context.Context, book *domain.Book) error {
+	now := sr.cl.Now()
+	book.UpdatedAt = now
 
 	//トランザクション
 	tx, err := sr.db.BeginTx(ctx, &sql.TxOptions{})
@@ -88,6 +89,32 @@ func (sr *Shelf) UpdateBook(ctx context.Context, book *domain.Book) error {
 
 	//本の更新
 	_, err = tx.NewUpdate().Model(book).WherePK().Exec(ctx)
+	if err != nil {
+		return err
+	}
+	//チャートの更新
+	charts := []*domain.Chart{}
+	err = tx.NewSelect().Model(&charts).Where("book_id = ?", book.ID).Scan(ctx)
+	if err != nil {
+		return err
+	}
+	for _, c := range charts {
+		switch c.Label {
+		case domain.ChartPrice:
+			c.Data = book.Price
+			c.UpdatedAt = now
+		case domain.ChartVolumes:
+			continue
+		case domain.ChartPages:
+			c.Data = book.Page
+			c.UpdatedAt = now
+		}
+	}
+	_, err = tx.NewUpdate().Model(&charts).
+		Column("data", "updated_at").
+		WherePK().
+		Bulk().
+		Exec(ctx)
 	if err != nil {
 		return err
 	}

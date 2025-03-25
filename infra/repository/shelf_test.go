@@ -85,7 +85,7 @@ func TestCreateBookWithCharts(t *testing.T) {
 	a.Nil(err)
 }
 
-func TestUpdateBook(t *testing.T) {
+func TestUpdateBookWithCharts(t *testing.T) {
 	//Arrange
 	db := testutils.SetUpDBForRepository(t)
 	t.Cleanup(func() { db.Close() })
@@ -110,7 +110,7 @@ func TestUpdateBook(t *testing.T) {
 	a := assert.New(t)
 
 	//Act
-	err := sr.UpdateBook(ctx, book)
+	err := sr.UpdateBookWithCharts(ctx, book)
 
 	//Assert
 	a.Nil(err)
