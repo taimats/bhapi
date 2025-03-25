@@ -28,12 +28,6 @@ var (
 )
 
 func main() {
-	// /************ローカル環境での確認用****************/
-	// err := godotenv.Load(".env")
-	// if err != nil {
-	// 	log.Fatalf(".envファイルの読み込みに失敗:%s", err)
-	// }
-
 	//データベースの接続設定
 	dsn := infra.NewDBConfig()
 	db, err := infra.NewDatabaseConnection(dsn)
