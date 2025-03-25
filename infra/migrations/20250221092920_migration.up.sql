@@ -1,0 +1,6 @@
+-- create "books" table
+CREATE TABLE "books" ("id" bigserial NOT NULL, "isbn_10" character varying NULL, "image_url" character varying NULL, "title" character varying NULL, "author" character varying NULL, "page" integer NULL, "price" integer NULL, "book_status" character varying NOT NULL, "auth_user_id" character varying NOT NULL, "created_at" timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP, "updated_at" timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY ("id"));
+-- create "charts" table
+CREATE TABLE "charts" ("id" bigserial NOT NULL, "label" character varying NULL, "year" integer NULL, "month" integer NULL, "data" integer NULL, "auth_user_id" character varying NOT NULL, "book_id" bigint NOT NULL, "created_at" timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP, "updated_at" timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY ("id"));
+-- create "users" table
+CREATE TABLE "users" ("id" bigserial NOT NULL, "auth_user_id" character varying NOT NULL, "name" character varying NULL, "email" character varying NOT NULL, "password" character varying NULL, "created_at" timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP, "updated_at" timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY ("id"), CONSTRAINT "users_auth_user_id_key" UNIQUE ("auth_user_id"), CONSTRAINT "users_email_key" UNIQUE ("email"));

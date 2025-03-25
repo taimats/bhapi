@@ -1,0 +1,553 @@
+openapi: 3.0.3
+
+info:
+  title: Book Search
+  version: 1.0.0
+
+servers:
+  - url: "http://localhost:8080/v1"
+    description: "ローカル環境"
+  - url: "https://sample.com/v1"
+    description: "本番環境"
+
+tags:
+  - name: "healthCheck"
+    description: "サーバーの監視"
+  - name: "auth"
+    description: "ユーザー登録"
+  - name: "users"
+    description: "ユーザー情報の取得、更新"
+  - name: "records"
+    description: "記録の取得"
+  - name: "charts"
+    description: "図表の取得"
+  - name: "shelf"
+    description: "本棚の取得、更新"
+  - name: "search"
+    description: "書籍APIから本情報を取得"
+
+security:
+  - ApiKeyAuth: [] 
+
+paths:
+  /health:
+    get: 
+      tags: ["healthCheck"]
+      summary: "サーバーの監視"
+      responses:
+        "200":
+          description: "サーバー正常稼働"
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: { type: string, description: "ok" }
+  /health/db:
+    get: 
+      tags: ["healthCheck"]
+      summary: "DBサーバーの監視"
+      responses:
+        "200":
+          description: "DBサーバー正常稼働"
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: { type: string, description: "ok" }
+  /auth/register:
+    post:
+      tags: ["auth"]
+      summary: "user情報の登録"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "201":
+          description: "ユーザー登録に成功"
+        "400":
+          description: "不正なリクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: "ユーザー登録に失敗"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /users/{authUserId}:
+    get:
+      tags: ["users"]
+      summary: "ユーザー情報を返す"
+      parameters:
+        - name: authUserId
+          in: path
+          required: true
+          description: "ユーザーの識別子"
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "ユーザー情報の取得に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: "不正なリクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: "認証が必要なリクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: "ユーザーなし"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: "ユーザー処理に失敗"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags: ["users"]
+      summary: "ユーザーを削除"
+      parameters:
+        - name: authUserId
+          in: path
+          required: true
+          description: "ユーザーの識別子"
+          schema:
+            type: string
+      responses:
+        "204":
+          description: "ユーザー削除に成功"
+        "400":
+          description: "不正なリクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: "認証が必要なリクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: "ユーザーなし"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: "削除処理に失敗"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /users:
+    put:
+        tags: ["users"]
+        summary: "ユーザー情報を更新"
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        responses:
+          "200":
+            description: "ユーザー情報の更新に成功"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/User"
+          "400":
+            description: "不正なリクエスト"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+          "401":
+            description: "認証が必要なリクエスト"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+          "404":
+            description: "ユーザーなし"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+          "500":
+            description: "ユーザー処理に失敗"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+
+  /records/{authUserId}:
+    get:
+      tags: ["records"]
+      summary: "ユーザーごとに記録を返す"
+      parameters:
+        - name: authUserId
+          in: path
+          required: true
+          description: "ユーザーの識別子"
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "記録の取得に成功"
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  $ref: "#/components/schemas/Record"
+        "400":
+          description: "不正なリクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: "認証が必要なリクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: "記録なし"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: "記録処理に失敗"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /charts/{authUserId}:
+    get:
+      tags: ["charts"]
+      summary: "ユーザーごとにチャートデータを返す"
+      parameters:
+        - name: authUserId
+          in: path
+          required: true
+          description: "ユーザーの識別子"
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "チャートの取得に成功"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Chart"
+        "400":
+          description: "不正なリクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: "認証が必須"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: "記録なし"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: "チャート処理に失敗"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /shelf/{authUserId}:
+    get:
+      tags: ["shelf"]
+      summary: "ユーザーごとに本棚を取得"
+      parameters:
+        - name: authUserId
+          in: path
+          required: true
+          description: "ユーザーの識別子"
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "本棚の取得に成功"
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  $ref: "#/components/schemas/Book"
+        "400":
+          description: "不正なリクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: "認証が必要"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: "本棚なし"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: "本棚処理に失敗"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      tags: ["shelf"]
+      summary: "ユーザーごとに本棚の本を1冊ずつ更新"
+      parameters:
+        - name: authUserId
+          in: path
+          required: true
+          description: "ユーザーの識別子"
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema: 
+              $ref: "#/components/schemas/Book"
+      responses:
+        "200":
+          description: "本の更新に成功"
+        "400":
+          description: "不正なリクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: "認証が必要"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: "本がない"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: "更新処理に失敗"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      tags: ["shelf"]
+      summary: "ユーザーごとに本を本棚に1冊ずつ作成"
+      parameters:
+        - name: authUserId
+          in: path
+          required: true
+          description: "ユーザーの識別子"
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema: 
+              $ref: "#/components/schemas/Book"
+      responses:
+        "201":
+          description: "本の作成に成功"
+        "400":
+          description: "不正なリクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: "認証が必要"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: "本の作成に失敗"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags: ["shelf"]
+      summary: "ユーザーごとに本棚の本を複数削除"
+      parameters:
+        - name: authUserId
+          in: path
+          required: true
+          description: "ユーザーの識別子"
+          schema:
+            type: string
+        - name: bookId
+          in: query
+          required: true
+          description: "書籍の識別子"
+          schema:
+            type: array
+            items: { type: string, description: "書籍IDの一覧" }
+      responses:
+        "204":
+          description: "本棚の削除に成功"
+        "400":
+          description: "不正なリクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: "認証が必要"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: "本棚なし"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: "削除処理に失敗"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /search:
+    get:
+      tags: ["search"]
+      summary: "書籍の検索結果を取得"
+      parameters:
+        - name: query
+          in: query
+          required: true
+          description: "検索文字列"
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "検索結果の取得に成功"
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  $ref: "#/components/schemas/Book"
+        "400":
+          description: "不正なリクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: "認証が必要"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: "検索処理に失敗"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id: { type: string, description: "バックユーザーの識別子" }
+        authUserId: { type: string, description: "フロントユーザーの識別子" }
+        name: { type: string, description: "ユーザー名" }
+        email: { type: string, description: "ユーザーemail" }
+        password: { type: string, description: "パスワード（あれば）" }
+        createdAt: { type: string, description: "ユーザーの作成日時" }
+        updatedAt: { type: string, description: "ユーザーの更新日時" }
+    Record:
+      type: object
+      properties:
+        id: { type: string, description: "記録の識別子" }
+        costs: { type: string, description: "購入額の総計" }
+        costsRead: { type: string, description: "購入額のうち読了分" }
+        volumes: { type: string, description: "購入冊数の総計" }
+        volumesRead: { type: string, description: "購入冊数のうち読了分" }
+        pages: { type: string, description: "購入ページ数の総計" }
+        pagesRead: { type: string, description: "購入ページ数のうち読了分" }
+    Chart:
+      type: object
+      properties:
+        id: { type: string, description: "図表の識別子" }
+        label: { type: string, description: "チャートを分類する識別子" }
+        year: { type: string, description: "各データの年" }
+        month: { type: string, description: "各データの月" }
+        data: { type: string, description: "各データ内容" }
+    Book: 
+      type: object
+      properties:
+        id: { type: string, description: "本の識別子" }
+        isbn10: { type: string, description: "本のisbn10" }
+        imageURL: { type: string, description: "本の画像" }
+        title: { type: string, description: "本の書名" }
+        author: { type: string, description: "本の著者" }
+        page: { type: string, description: "本のページ数" }
+        price: { type: string, description: "本の価格" }
+        bookStatus: { type: string, description: "本の状態" }
+        authUserId: { type: string, description: "ユーザーの識別子" }
+        createdAt: { type: string, description: "本の作成日時" }
+        updatedAt: { type: string, description: "本の更新日時" }
+    Error: 
+      type: object
+      properties:
+        message: { type: string, description: "エラーメッセージ" }
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization

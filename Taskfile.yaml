@@ -1,0 +1,72 @@
+version: '3'
+
+dotenv:
+  - ".env"
+
+tasks:
+  default:
+    cmd: task --list
+    desc: "タスク一覧を出力"
+  
+  up-all:
+    cmd: docker compose up -d
+    desc: "すべてのdockerサービスを起動"
+  
+  down-all:
+    cmd: docker compose down
+    desc: "すべてのdockerサービスを停止"
+  
+  wipeout:
+    desc: "docker composeを完全に削除"
+    cmd: docker compose down --rmi all --volumes --remove-orphans
+  
+  up-api:
+    cmd: docker compose up -d api
+    desc: "バックAPIサーバーを起動"
+  
+  up-db:
+    cmd: docker compose up -d db
+    desc: "データベースサーバーを起動"
+  
+  con-db:
+    cmd: docker compose exec -it db psql -U ${POSTGRES_USER} ${POSTGRES_DB}
+    desc: "データベースに接続"
+  
+  up-mig:
+    desc: "golang-migrationでマイグレーションupの適応"
+    cmd: migrate -path ./infra/migrations -database "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}?search_path=public&sslmode=disable" -verbose up 
+ 
+  down-mig:
+    desc: "golang-migrationでマイグレーションdownの適応"
+    cmd: migrate -path ./infra/migrations -database "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@$localhost:5432/${POSTGRES_DB}?search_path=public&sslmode=disable" -verbose down
+ 
+  apigen:
+    cmds:
+      - oapi-codegen --config=./apigen/config.yaml ./openapi.yaml 
+      - go mod tidy
+    desc: "openapiの仕様書に沿ったコードのひな形を自動出力(既存のファイルはpastgenに移動)"
+
+  dbschema:
+    desc: "DBスキーマファイルの自動生成"
+    cmd: go run ./infra/migrations/main.go
+  
+  migfile:
+    desc: "atlasでマイグレーションファイルの生成"
+    cmd: atlas migrate diff migration --dir 'file://infra/migrations?format=golang-migrate' --to 'file://infra/gen/schema.sql' --dev-url 'docker://postgres/16/dev?search_path=public'
+
+  cp-api:
+    desc: "openapi.yamlをフロントレポジトリにコピー"
+    cmd: wsl cp ./openapi.yaml ../bookhistory/openapi.yaml
+  
+  up-mig-prod:
+    desc: "本番環境へマイグレーションupを適応"
+    cmd: migrate -path ./infra/migrations -database "${PSQL_DSN}" -verbose up 
+ 
+  down-mig-prod:
+    desc: "本番環境へマイグレーションdownを適応"
+    cmd: migrate -path ./infra/migrations -database "${PSQL_DSN}" -verbose down
+ 
+
+
+
+  

@@ -1,0 +1,6 @@
+package: apigen
+generate:
+  echo-server: true
+  models: true
+  embedded-spec: true
+output: apigen/gen.go
