@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -19,6 +20,7 @@ import (
 	"github.com/taimats/bhapi/infra/repository"
 	"github.com/taimats/bhapi/presenter/handler"
 	"github.com/taimats/bhapi/presenter/middleware/auth"
+	"github.com/taimats/bhapi/presenter/middleware/loggers"
 	"github.com/taimats/bhapi/utils"
 )
 
@@ -26,6 +28,8 @@ var (
 	allowedOrigins = []string{os.Getenv("FRONT_API_BASE_URL")}
 	allowedMethods = []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete}
 	allowedHeaders = []string{echo.HeaderContentType, echo.HeaderAuthorization}
+
+	AuthSkippedPaths = map[string]struct{}{"/v1/health": {}, "/v1/health/db": {}}
 )
 
 func main() {
@@ -62,15 +66,22 @@ func main() {
 	e := echo.New()
 
 	//echoのmiddlewareの設定
-	e.Use(middleware.Logger())
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	e.Use(middleware.Recover())
+	e.Use(middleware.RequestLoggerWithConfig(
+		loggers.NewRequestLoggerConfig(logger),
+	))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: allowedOrigins,
 		AllowMethods: allowedMethods,
 		AllowHeaders: allowedHeaders,
 	}))
 	e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
-		Skipper:    middleware.DefaultSkipper,
+		Skipper: func(c echo.Context) bool {
+			_, ok := AuthSkippedPaths[c.Request().URL.Path]
+			return ok
+		},
+
 		KeyLookup:  "header:" + echo.HeaderAuthorization,
 		AuthScheme: "Bearer",
 		Validator: func(key string, c echo.Context) (bool, error) {
