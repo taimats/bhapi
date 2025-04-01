@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/taimats/bhapi/controller"
@@ -32,6 +33,15 @@ var (
 )
 
 func main() {
+	//開発環境での環境変数の設定
+	env := os.Getenv("Env")
+	if env == "" {
+		err := godotenv.Load(".env")
+		if err != nil {
+			log.Fatalf(".envファイルの読み込みに失敗:%s", err)
+		}
+	}
+
 	//データベースの接続設定
 	dsn := infra.NewDBConfig()
 	db, err := infra.NewDatabaseConnection(dsn)
