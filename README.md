@@ -14,7 +14,7 @@ WEBアプリ「BOOK HISTORY」のバックエンドREST APIサーバー
 |**8. Render**|サーバー、データベースともにデプロイ先として利用|
 
 ## アーキテクチャ
-ヘキサゴナルアーキテクチャ（をイメージ）
+ヘキサゴナルアーキテクチャ（をイメージ）  
 <img src="https://github.com/user-attachments/assets/4951eb7e-d040-4942-8d04-a31bb8c88eb3" width="400">
 
 ## 機能一覧
