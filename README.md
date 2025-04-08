@@ -15,7 +15,7 @@ WEBアプリ「BOOK HISTORY」のバックエンドREST APIサーバー
 
 ## アーキテクチャ
 ヘキサゴナルアーキテクチャ（をイメージ）  
-<img src="https://github.com/user-attachments/assets/4951eb7e-d040-4942-8d04-a31bb8c88eb3" width="400">
+<img src="https://github.com/user-attachments/assets/4951eb7e-d040-4942-8d04-a31bb8c88eb3" width="600">
 
 ## 機能一覧
 |メソッド|エンドポイント|機能|認証の有無|
