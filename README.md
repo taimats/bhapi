@@ -11,10 +11,12 @@ WEBアプリ「BOOK HISTORY」のバックエンドREST APIサーバー
 |**5. Atlas 0.31.1**|マイグレーションファイルのバージョン管理に使用|
 |**6. migrate 4.18.1**|マイグレーションに使用|
 |**7. PostgreSQL 16**|データベース|
-|**8. Render**|サーバー、データベースともにデプロイ先として利用|
+|**8. AWS**|インフラを構築|
+|**9. Terraform**|インフラをコードで管理|
 
 ## サーバーアーキテクチャ
-ヘキサゴナルアーキテクチャ（をイメージ）  
+ヘキサゴナルアーキテクチャ（をイメージ）
+
 <img src="https://github.com/user-attachments/assets/4951eb7e-d040-4942-8d04-a31bb8c88eb3" width="600">
 
 ## 機能一覧
@@ -36,4 +38,5 @@ WEBアプリ「BOOK HISTORY」のバックエンドREST APIサーバー
 
 ## インフラアーキテクチャ
 Terraformを通じてAWSで構築
+
 <img src="https://github.com/user-attachments/assets/346d8ee7-391e-4190-ade3-d0763b4805ea" width="600">
