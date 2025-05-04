@@ -3,6 +3,8 @@ version: '3'
 dotenv:
   - ".env"
 
+silent: true
+
 tasks:
   default:
     cmd: task --list
@@ -65,6 +67,14 @@ tasks:
   down-mig-prod:
     desc: "本番環境へマイグレーションdownを適応"
     cmd: migrate -path ./infra/migrations -database "${PSQL_DSN}" -verbose down
+  
+  build-prod:
+    desc: 本番環境用へのbuild
+    cmds:
+      - echo "buildの開始"
+      - go clean -cache
+      - go build -trimpath -ldflags "-w -s"
+      - echo "success!"
  
 
 
