@@ -12,7 +12,7 @@ WEBアプリ「BOOK HISTORY」のバックエンドREST APIサーバー
 |**6. migrate 4.18.1**|マイグレーションに使用|
 |**7. PostgreSQL 16**|データベース|
 |**8. AWS**|インフラを構築|
-|**9. Terraform**|インフラをコードで管理|
+|**9. Terraform 1.11.4**|インフラをコードで管理|
 
 ## サーバーアーキテクチャ
 ヘキサゴナルアーキテクチャ（をイメージ）
@@ -39,4 +39,4 @@ WEBアプリ「BOOK HISTORY」のバックエンドREST APIサーバー
 ## インフラアーキテクチャ
 Terraformを通じてAWSで構築
 
-<img src="https://github.com/user-attachments/assets/346d8ee7-391e-4190-ade3-d0763b4805ea" width="600">
+<img src="https://github.com/user-attachments/assets/346d8ee7-391e-4190-ade3-d0763b4805ea" width="800">
