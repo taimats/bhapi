@@ -13,7 +13,7 @@ WEBアプリ「BOOK HISTORY」のバックエンドREST APIサーバー
 |**7. PostgreSQL 16**|データベース|
 |**8. Render**|サーバー、データベースともにデプロイ先として利用|
 
-## アーキテクチャ
+## サーバーアーキテクチャ
 ヘキサゴナルアーキテクチャ（をイメージ）  
 <img src="https://github.com/user-attachments/assets/4951eb7e-d040-4942-8d04-a31bb8c88eb3" width="600">
 
@@ -33,3 +33,7 @@ WEBアプリ「BOOK HISTORY」のバックエンドREST APIサーバー
 |POST|/shelf/{id}|本棚に本を追加|認証キー
 |DELETE|/shelf/{id}|本棚の本を削除|認証キー
 |GET|/search|書籍の検索結果を取得|認証キー
+
+## インフラアーキテクチャ
+Terraformを通じてAWSで構築
+<img src="https://github.com/user-attachments/assets/346d8ee7-391e-4190-ade3-d0763b4805ea" width="600">
