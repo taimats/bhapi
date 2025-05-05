@@ -39,4 +39,4 @@ WEBアプリ「BOOK HISTORY」のバックエンドREST APIサーバー
 ## インフラアーキテクチャ
 Terraformを通じてAWSで構築
 
-<img src="https://github.com/user-attachments/assets/346d8ee7-391e-4190-ade3-d0763b4805ea" width="800">
+<img src="https://github.com/user-attachments/assets/b5360d49-6c84-4010-9e0a-91c54726c3a3" width="800">
