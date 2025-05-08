@@ -1,5 +1,4 @@
 .env*
-
 .memo
-
 test.http
+.ssh/*
