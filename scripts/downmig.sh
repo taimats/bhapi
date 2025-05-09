@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 source ../.env
-migrate -path ./migrations -database "${PSQL_DSN}" -verbose down
+migrate -path ../infra/migrations -database "${PSQL_DSN}" -verbose down
