@@ -13,6 +13,7 @@ WEBアプリ「BOOK HISTORY」のバックエンドREST APIサーバー
 |**7. PostgreSQL 16**|データベース|
 |**8. AWS**|インフラを構築|
 |**9. Terraform 1.11.4**|インフラをコードで管理|
+|**10. GitHub Actions**|CI/CDを実現|
 
 ## サーバーアーキテクチャ
 ヘキサゴナルアーキテクチャ（をイメージ）
