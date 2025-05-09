@@ -1,0 +1,33 @@
+name: deploy
+
+on:
+  push:
+    branches: 
+      - main
+    paths: 
+      - "*.go"
+      - "!*_test.go"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          proxy_host: ${{ secrets.PROXY_HOST }}
+          proxy_username: ${{ secrets.PROXY_USERNAME }}
+          proxy_key: ${{ secrets.PROXY_KEY }}
+          proxy_port: ${{ secrets.PROXY_PORT }}
+
+          host: "${{ secrets.SERVER_HOST_01 }}, ${{ secrets.SERVER_HOST_02 }}"
+          username: ${{ secrets.SERVER_USERNAME }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          
+          script: |
+            cd ${{ secrets.SERVER_DEPLOY_DIR }}
+            git pull origin main
+            go clean -cache && go build -trimpath -ldflags "-w -s"
+            ./bhapi
