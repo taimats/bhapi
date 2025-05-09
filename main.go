@@ -33,13 +33,10 @@ var (
 )
 
 func main() {
-	//開発環境での環境変数の設定
-	env := os.Getenv("Env")
-	if env == "" {
-		err := godotenv.Load(".env")
-		if err != nil {
-			log.Fatalf(".envファイルの読み込みに失敗:%s", err)
-		}
+	//環境変数の設定
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf(".envファイルの読み込みに失敗:%s", err)
 	}
 
 	//データベースの接続設定
