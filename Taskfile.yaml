@@ -73,7 +73,7 @@ tasks:
     cmds:
       - echo "buildの開始"
       - go clean -cache
-      - go build -o ./.ssh/bhapi -trimpath -ldflags "-w -s"
+      - go build -trimpath -ldflags "-w -s"
       - echo "success!"
  
 
