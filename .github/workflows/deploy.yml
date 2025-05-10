@@ -11,6 +11,19 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        host: 
+          - ${{ secrets.SERVER_HOST_01 }}
+          - ${{ secrets.SERVER_HOST_02 }}
+        key: 
+          - ${{ secrets.SSH_PRIVATE_KEY_01}}
+          - ${{ secrets.SSH_PRIVATE_KEY_02}}
+        exclude:
+          - host: ${{ secrets.SERVER_HOST_01 }}
+            key: ${{ secrets.SSH_PRIVATE_KEY_02}}
+          - host: ${{ secrets.SERVER_HOST_02 }}
+            key: ${{ secrets.SSH_PRIVATE_KEY_01}}
     steps:
       - name: Deploy
         uses: appleboy/ssh-action@v1
@@ -20,13 +33,14 @@ jobs:
           proxy_key: ${{ secrets.PROXY_KEY }}
           proxy_port: ${{ secrets.PROXY_PORT }}
 
-          host: "${{ secrets.SERVER_HOST_01 }}, ${{ secrets.SERVER_HOST_02 }}"
+          host: ${{ matrix.host }}
           username: ${{ secrets.SERVER_USERNAME }}
           port: ${{ secrets.SSH_PORT }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ matrix.key }}
           
           script: |
             cd ${{ secrets.SERVER_DEPLOY_DIR }}
             git pull origin main
-            go clean -cache && go build -trimpath -ldflags "-w -s"
-            ./bhapi
+            go clean -cache && go build -o ~/bin/bhapi -trimpath -ldflags "-w -s"
+            chmod +x ~/bin/bhapi
+            ~/bin/bhapi
