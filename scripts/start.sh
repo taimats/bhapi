@@ -6,7 +6,7 @@
 # - 本番環境用に環境変数(.env)ファイルの配置
 # - マイグレーション
 
-source ../.env
+source ./.env
 
 # go関連の処理
 cd ${SERVER_DIR}
@@ -17,8 +17,4 @@ go mod tidy
 go clean -cache && go build -o ${EXECUTE_PATH} -trimpath -ldflags "-w -s"
 sudo chmod +x ${EXECUTE_PATH}
 nohup ${EXECUTE_PATH} &
-if [ $? -eq 0]; then
-  echo "サーバーが稼働中です!!"
-else
-  echo "サーバーの起動に失敗"
-fi
+echo "サーバーが稼働中です!!"

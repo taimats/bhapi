@@ -45,8 +45,4 @@ jobs:
             go clean -cache && go build -o ${{ secrets.SERVER_EXECUTE_PATH }} -trimpath -ldflags "-w -s"
             chmod +x ${{ secrets.SERVER_EXECUTE_PATH }}
             nohup ${{ secrets.SERVER_EXECUTE_PATH }} &
-            if [ $? -eq 0 ]; then
-              echo "デプロイが完了しました!!"
-            else
-              echo "デプロイに失敗"
-            fi
+            echo "サーバーが稼働中です!!"
