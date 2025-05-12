@@ -11,19 +11,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      SERVER_HOST_01: ${{ secrets.SERVER_HOST_01 }}
+      SERVER_HOST_02: ${{ secrets.SERVER_HOST_02 }}
+      SSH_PRIVATE_KEY_01: ${{ secrets.SSH_PRIVATE_KEY_01}}
+      SSH_PRIVATE_KEY_02: ${{ secrets.SSH_PRIVATE_KEY_02}}
     strategy:
       matrix:
-        host: 
-          - ${{ secrets.SERVER_HOST_01 }}
-          - ${{ secrets.SERVER_HOST_02 }}
-        key: 
-          - ${{ secrets.SSH_PRIVATE_KEY_01}}
-          - ${{ secrets.SSH_PRIVATE_KEY_02}}
+        host: [$SERVER_HOST_01, $SERVER_HOST_02]
+        key: [$SSH_PRIVATE_KEY_01, $SSH_PRIVATE_KEY_02]
         exclude:
-          - host: ${{ secrets.SERVER_HOST_01 }}
-            key: ${{ secrets.SSH_PRIVATE_KEY_02}}
-          - host: ${{ secrets.SERVER_HOST_02 }}
-            key: ${{ secrets.SSH_PRIVATE_KEY_01}}
+          - host: $SERVER_HOST_01
+            key: $SSH_PRIVATE_KEY_02
+          - host: $SERVER_HOST_02
+            key: $SSH_PRIVATE_KEY_01
     steps:
       - name: Deploy
         uses: appleboy/ssh-action@v1
@@ -41,6 +42,11 @@ jobs:
           script: |
             cd ${{ secrets.SERVER_DEPLOY_DIR }}
             git pull origin main
-            go clean -cache && go build -o ~/bin/bhapi -trimpath -ldflags "-w -s"
-            chmod +x ~/bin/bhapi
-            ~/bin/bhapi
+            go clean -cache && go build -o ${{ secrets.SERVER_EXECUTE_PATH }} -trimpath -ldflags "-w -s"
+            chmod +x ${{ secrets.SERVER_EXECUTE_PATH }}
+            nohup ${{ secrets.SERVER_EXECUTE_PATH }} &
+            if [ $? -eq 0 ]; then
+              echo "デプロイが完了しました!!"
+            else
+              echo "デプロイに失敗"
+            fi
