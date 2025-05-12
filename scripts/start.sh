@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
 
 # 以下の処理の完了後に行う
-# 　SSHキーをGitHubに登録
-# 　リポジトリのクローン
-# 　本番環境用に環境変数(.env)ファイルの配置
+# - SSHキーをGitHubに登録
+# - リポジトリのクローン
+# - 本番環境用に環境変数(.env)ファイルの配置
+# - マイグレーション
 
-source ./.env
-cd ${SERVER_DIR}
+source ../.env
 
 # go関連の処理
+cd ${SERVER_DIR}
 go mod download
 go mod tidy
 
-# マイグレーション
-chmod +x ${SERVER_DIR}/scripts/updmig.sh
-${SERVER_DIR}/scripts/updmig.sh
-
 # アプリ起動
-if [ $? -eq 0 ]; then
-  go clean -cache && go build -o ${HOME}/bin/bhapi -trimpath -ldflags "-w -s"
-  chmod +x ${HOME}/bin/bhapi
-  ${HOME}/bin/bhapi
+go clean -cache && go build -o ${EXECUTE_PATH} -trimpath -ldflags "-w -s"
+sudo chmod +x ${EXECUTE_PATH}
+nohup ${EXECUTE_PATH} &
+if [ $? -eq 0]; then
+  echo "サーバーが稼働中です!!"
+else
+  echo "サーバーの起動に失敗"
 fi

@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-source ./.env
-migrate -path ./infra/migrations -database "${PSQL_DSN}" -verbose down
+source ${HOME}/bhapi/.env
+migrate -path ${HOME}/bhapi/infra/migrations -database "${PSQL_DSN}" -verbose down
