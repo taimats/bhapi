@@ -16,5 +16,5 @@ go mod tidy
 # アプリ起動
 go clean -cache && go build -o ${EXECUTE_PATH} -trimpath -ldflags "-w -s"
 sudo chmod +x ${EXECUTE_PATH}
-cd ${HOME} && nohup ${EXECUTE_PATH} &
-echo "サーバーが稼働中です!!"
+nohup ${EXECUTE_PATH} &
+mv ./nohup.out ${HOME}/

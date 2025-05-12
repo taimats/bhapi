@@ -44,6 +44,5 @@ jobs:
             git pull origin main
             go clean -cache && go build -o ${{ secrets.SERVER_EXECUTE_PATH }} -trimpath -ldflags "-w -s"
             chmod +x ${{ secrets.SERVER_EXECUTE_PATH }}
-            cd ${HOME}
             nohup ${{ secrets.SERVER_EXECUTE_PATH }} &
-            echo "サーバーが稼働中です!!"
+            mv ./nohup.out ${HOME}/
