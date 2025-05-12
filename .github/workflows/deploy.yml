@@ -33,16 +33,12 @@ jobs:
           proxy_username: ${{ secrets.PROXY_USERNAME }}
           proxy_key: ${{ secrets.PROXY_KEY }}
           proxy_port: ${{ secrets.PROXY_PORT }}
+          proxy_passphrase: ${{ secrets.PROXY_PASSPHRASE }}
 
           host: ${{ matrix.host }}
           username: ${{ secrets.SERVER_USERNAME }}
           port: ${{ secrets.SSH_PORT }}
           key: ${{ matrix.key }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           
-          script: |
-            cd ${{ secrets.SERVER_DEPLOY_DIR }}
-            git pull origin main
-            go clean -cache && go build -o ${{ secrets.SERVER_EXECUTE_PATH }} -trimpath -ldflags "-w -s"
-            chmod +x ${{ secrets.SERVER_EXECUTE_PATH }}
-            nohup ${{ secrets.SERVER_EXECUTE_PATH }} &
-            mv ./nohup.out ${HOME}/
+          script_path: scripts/deploy.sh
