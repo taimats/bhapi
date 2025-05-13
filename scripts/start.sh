@@ -16,5 +16,4 @@ go mod tidy
 # アプリ起動
 go clean -cache && go build -o ${EXECUTE_PATH} -trimpath -ldflags "-w -s"
 sudo chmod +x ${EXECUTE_PATH}
-nohup ${EXECUTE_PATH} &
-mv ./nohup.out ${HOME}/
+nohup ${EXECUTE_PATH} & > "${HOME}/app_$(date '+%Y_%m_%d_%H:%M:%S').log"
