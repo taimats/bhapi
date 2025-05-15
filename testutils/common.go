@@ -8,35 +8,37 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func SetEnvForTest() error {
-	cwd, err := os.Getwd()
+// 実行場所からルート直下のenvファイル（bhapi/.env）を設定
+func DotEnv() error {
+	usrDir, err := os.UserHomeDir()
 	if err != nil {
-		return fmt.Errorf("CWDの取得に失敗:%s", err)
+		return fmt.Errorf("ユーザーディレクトリの取得に失敗:%w", err)
+	}
+	targetPath := fmt.Sprintf("%s/bhapi/.env", usrDir)
+
+	envfn, err := relPath(targetPath)
+	if err != nil {
+		return fmt.Errorf("相対パスの取得に失敗:%w", err)
 	}
 
-	srcPath := "C:/Users/beo03/bookhistoryapi/.env"
-	efn, err := filepath.Rel(cwd, srcPath)
-	if err != nil {
-		return fmt.Errorf("envファイルの相対パス生成に失敗:%s", err)
-	}
-
-	if err := godotenv.Load(efn); err != nil {
-		return fmt.Errorf(".envファイルの取得に失敗:%s", err)
+	if err := godotenv.Load(envfn); err != nil {
+		return fmt.Errorf(".envファイルのロードに失敗:%w", err)
 	}
 
 	return nil
 }
 
-func NewRelativePath(targetPath string) (relativePath string, err error) {
+// 現在のディレクトリから指定パスまでの相対パスを生成
+func relPath(targetPath string) (relPath string, err error) {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return "", fmt.Errorf("cwdの取得に失敗:%w", err)
 	}
 
-	relativePath, err = filepath.Rel(cwd, targetPath)
+	relPath, err = filepath.Rel(cwd, targetPath)
 	if err != nil {
 		return "", fmt.Errorf("相対パスの取得に失敗:%w", err)
 	}
 
-	return relativePath, err
+	return relPath, nil
 }
