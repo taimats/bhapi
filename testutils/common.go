@@ -16,7 +16,7 @@ func DotEnv() error {
 	}
 	targetPath := filepath.Join(usrDir, "bhapi", ".env")
 
-	envfn, err := relPath(targetPath)
+	envfn, err := RelPath(targetPath)
 	if err != nil {
 		return fmt.Errorf("相対パスの取得に失敗:%w", err)
 	}
@@ -29,10 +29,10 @@ func DotEnv() error {
 }
 
 // 現在のディレクトリから指定パスまでの相対パスを生成
-func relPath(targetPath string) (relPath string, err error) {
+func RelPath(targetPath string) (relPath string, err error) {
 	cwd, err := os.Getwd()
 	if err != nil {
-		return "", fmt.Errorf("cwdの取得に失敗:%w", err)
+		return "", fmt.Errorf("現在のディレクトリの取得に失敗:%w", err)
 	}
 
 	relPath, err = filepath.Rel(cwd, targetPath)
