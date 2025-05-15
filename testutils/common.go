@@ -28,6 +28,27 @@ func DotEnv() error {
 	return nil
 }
 
+// 実行場所からtestutils/testdata以下にあるファイルを取得
+func TestFile(fileName string) (testData []byte, err error) {
+	usrDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, fmt.Errorf("ユーザーディレクトリの取得に失敗:%w", err)
+	}
+	targetPath := filepath.Join(usrDir, "bhapi", "testutils", "testdata", fileName)
+
+	relPath, err := RelPath(targetPath)
+	if err != nil {
+		return nil, fmt.Errorf("相対パスの取得に失敗:%w", err)
+	}
+
+	testData, err = os.ReadFile(relPath)
+	if err != nil {
+		return nil, fmt.Errorf("テストデータの取得に失敗:%w", err)
+	}
+
+	return testData, nil
+}
+
 // 現在のディレクトリから指定パスまでの相対パスを生成
 func RelPath(targetPath string) (relPath string, err error) {
 	cwd, err := os.Getwd()
