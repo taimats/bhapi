@@ -14,7 +14,7 @@ func DotEnv() error {
 	if err != nil {
 		return fmt.Errorf("ユーザーディレクトリの取得に失敗:%w", err)
 	}
-	targetPath := fmt.Sprintf("%s/bhapi/.env", usrDir)
+	targetPath := filepath.Join(usrDir, "bhapi", ".env")
 
 	envfn, err := relPath(targetPath)
 	if err != nil {
