@@ -1,4 +1,4 @@
-package search_test
+package domain_test
 
 import (
 	"net/url"
@@ -10,7 +10,12 @@ import (
 )
 
 func TestSearchForGoogleBooks(t *testing.T) {
+	t.Parallel()
 	//Arrange
+	err := testutils.DotEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
 	want := []*domain.BookResult{
 		{
 			ISBN10:   "4167110121",
@@ -54,10 +59,6 @@ func TestSearchForGoogleBooks(t *testing.T) {
 		},
 	}
 	q := "容疑者の献身"
-	err := testutils.SetEnvForTest()
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	ts := testutils.PseudoGoogleBooksAPIServer(t)
 	defer ts.Close()
@@ -81,8 +82,12 @@ func TestSearchForGoogleBooks(t *testing.T) {
 }
 
 func TestExtractBooksFromJSON(t *testing.T) {
+	t.Parallel()
 	//Arrange
-	jb := testutils.GenerateTestJSON(t)
+	searchResult, err := testutils.TestFile("response_body.json")
+	if err != nil {
+		t.Fatalf("テストデータの取得に失敗:%s", err)
+	}
 	want := []*domain.BookResult{
 		{
 			ISBN10:   "4167110121",
@@ -127,7 +132,7 @@ func TestExtractBooksFromJSON(t *testing.T) {
 	}
 
 	//Act
-	got, err := domain.ExtractBooksFromJSON(string(jb))
+	got, err := domain.ExtractBooksFromJSON(string(searchResult))
 	if err != nil {
 		t.Fatal(err)
 	}

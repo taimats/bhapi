@@ -1,4 +1,4 @@
-package entity_test
+package domain_test
 
 import (
 	"testing"
@@ -9,6 +9,7 @@ import (
 )
 
 func TestNewRecordFromBooks(t *testing.T) {
+	t.Parallel()
 	//Arrange
 	books := []*domain.Book{
 		{
