@@ -4,13 +4,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/joho/godotenv"
 	"github.com/taimats/bhapi/presenter/middleware/auth"
+	"github.com/taimats/bhapi/testutils"
 )
 
 func TestAuthenticate(t *testing.T) {
 	//Arrange
-	err := godotenv.Load(".env")
+	err := testutils.DotEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
