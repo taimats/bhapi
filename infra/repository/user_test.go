@@ -14,7 +14,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	err := testutils.SetEnvForTest()
+	err := testutils.DotEnv()
 	if err != nil {
 		log.Fatal(err)
 	}
