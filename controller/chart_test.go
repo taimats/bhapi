@@ -13,7 +13,6 @@ import (
 )
 
 func TestGetCharts(t *testing.T) {
-	t.Parallel()
 	//Arrange ***************
 	ctx := context.Background()
 	container, Terminate, err := testutils.SetUpDBContainer(ctx)

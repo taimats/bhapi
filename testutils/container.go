@@ -18,9 +18,48 @@ import (
 
 type TerminateContainer func(pctr *postgres.PostgresContainer)
 
-// パッケージ単位で再利用可能なPostgres用コンテナの生成。マイグレーション完了後にスナップショットをとる(pctr.Snapshot())ことで
-// テストケースごとにクリーンなDBサーバーが用意可能。
-func NewDBContainer(ctx context.Context) (pctr *postgres.PostgresContainer, Terminate func(c *postgres.PostgresContainer), err error) {
+// パッケージ単位で再利用可能なPostgres用コンテナの生成。内部でスナップショットをとり、
+// テストケースごとにクリーンなDBサーバーを用意。
+func SetUpDBContainer(ctx context.Context, migrationsPath string) (pctr *postgres.PostgresContainer, dsn string, terminate TerminateContainer, err error) {
+	pctr, terminate, err = newDBContainer(ctx)
+	if err != nil {
+		log.Fatalf("DBコンテナの生成に失敗:%s", err)
+	}
+	//マイグレーション
+	dsn, err = pctr.ConnectionString(ctx, "sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := migrateUp(dsn, migrationsPath); err != nil {
+		log.Fatalf("マイグレーションに失敗:%s", err)
+	}
+	//スナップショットでDBコンテナがリストア可能
+	if err := pctr.Snapshot(ctx); err != nil {
+		log.Fatalf("スナップショットの生成に失敗:%s", err)
+	}
+	return
+}
+
+// テストケースごとにDBコンテナをスナップショット状態に戻す。
+// リストアに失敗した場合、他のテストケースに影響があるため、リストアが失敗した時点でテストを終了。
+func RestoreContainer(pctr *postgres.PostgresContainer, ctx context.Context, t *testing.T) {
+	t.Cleanup(func() {
+		if err := pctr.Restore(ctx); err != nil {
+			t.Fatalf("DBコンテナのリストアに失敗:%s", err)
+		}
+	})
+}
+
+func InsertTestData[T any](ctx context.Context, t *testing.T, db *bun.DB, data ...T) {
+	t.Helper()
+
+	err := db.NewInsert().Model(&data).Scan(ctx)
+	if err != nil {
+		t.Fatalf("テストデータの挿入に失敗:%s", err)
+	}
+}
+
+func newDBContainer(ctx context.Context) (pctr *postgres.PostgresContainer, Terminate func(c *postgres.PostgresContainer), err error) {
 	//DB情報の取得
 	dbName := os.Getenv("POSTGRES_DB")
 	dbUser := os.Getenv("POSTGRES_USER")
@@ -51,17 +90,7 @@ func NewDBContainer(ctx context.Context) (pctr *postgres.PostgresContainer, Term
 	return pctr, Terminate, nil
 }
 
-// テストケースごとにDBコンテナをスナップショット状態に戻す。
-// リストアに失敗した場合、他のテストケースに影響があるため、リストアが失敗した時点でテストを終了。
-func RestoreContainer(pctr *postgres.PostgresContainer, ctx context.Context, t *testing.T) {
-	t.Cleanup(func() {
-		if err := pctr.Restore(ctx); err != nil {
-			t.Fatalf("DBコンテナのリストアに失敗:%s", err)
-		}
-	})
-}
-
-func MigrateUp(dsn string, migrationsPath string) error {
+func migrateUp(dsn string, migrationsPath string) error {
 	m, err := migrate.New("file://"+migrationsPath, dsn)
 	if err != nil {
 		log.Fatal(err)
@@ -70,15 +99,5 @@ func MigrateUp(dsn string, migrationsPath string) error {
 	if err := m.Up(); err != nil {
 		log.Fatal(err)
 	}
-
 	return nil
-}
-
-func InsertTestData[T any](ctx context.Context, t *testing.T, db *bun.DB, data ...T) {
-	t.Helper()
-
-	err := db.NewInsert().Model(&data).Scan(ctx)
-	if err != nil {
-		t.Fatalf("テストデータの挿入に失敗:%s", err)
-	}
 }

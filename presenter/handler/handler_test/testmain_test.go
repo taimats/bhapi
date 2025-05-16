@@ -10,7 +10,6 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 )
 
-// テストケース全体で共有する
 var pctr *postgres.PostgresContainer
 var dsn string
 
@@ -22,23 +21,14 @@ func TestMain(m *testing.M) {
 
 	//DBコンテナの生成
 	ctx := context.Background()
-	pctr, terminate, err := testutils.NewDBContainer(ctx)
-	if err != nil {
-		log.Fatalf("DBコンテナの生成に失敗:%s", err)
-	}
-	//マイグレーション
-	dsn, err = pctr.ConnectionString(ctx, "sslmode=disable")
+	migrationsPaths := "../../infra/migrations"
+	ctr, name, terminate, err := testutils.SetUpDBContainer(ctx, migrationsPaths)
 	if err != nil {
 		log.Fatal(err)
 	}
-	migrationsPath := "../../infra/migrations"
-	if err := testutils.MigrateUp(dsn, migrationsPath); err != nil {
-		log.Fatalf("マイグレーションに失敗:%s", err)
-	}
-	//スナップショットでDBコンテナがリストア可能
-	if err := pctr.Snapshot(ctx); err != nil {
-		log.Fatalf("スナップショットの生成に失敗:%s", err)
-	}
+	//varで定義された変数に詰めなおしてパッケージ内で共有
+	pctr = ctr
+	dsn = name
 
 	code := m.Run()
 

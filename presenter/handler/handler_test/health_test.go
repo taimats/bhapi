@@ -12,6 +12,7 @@ import (
 )
 
 func TestGetHealth(t *testing.T) {
+	t.Parallel()
 	//Arrange ***************
 	htls := testutils.PreSetUpForHandlerTest(t)
 	t.Cleanup(func() { htls.Terminate(htls.Container.Container) })
