@@ -16,8 +16,8 @@ func main() {
 		log.Fatalf(".envファイルの取得に失敗:%s", err)
 	}
 
-	conf := infra.NewDBConfig()
-	db, err := infra.NewDatabaseConnection(conf)
+	cfg := infra.NewDBConfig()
+	db, err := infra.NewDatabaseConnection(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
