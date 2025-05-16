@@ -50,7 +50,7 @@ tasks:
 
   dbschema:
     desc: "DBスキーマファイルの自動生成"
-    cmd: go run ./infra/migrations/main.go
+    cmd: go run ./infra/gen/main.go
   
   migfile:
     desc: "atlasでマイグレーションファイルの生成"
