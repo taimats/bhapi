@@ -2,7 +2,7 @@ package handler
 
 import "github.com/labstack/echo/v4"
 
-type ServerInterface interface {
+type HandlerInterface interface {
 	// user情報の登録
 	// (POST /auth/register)
 	PostAuthRegister(c echo.Context) error

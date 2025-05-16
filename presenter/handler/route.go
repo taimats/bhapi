@@ -2,22 +2,22 @@ package handler
 
 import "github.com/labstack/echo/v4"
 
-func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface) {
+func RegisterHandlersWithBaseURL(router EchoRouter, hi HandlerInterface) {
 	const baseURL = "/v1"
 
-	router.POST(baseURL+"/auth/register", si.PostAuthRegister)
-	router.GET(baseURL+"/charts/:authUserId", si.GetChartsWithAuthUserId)
-	router.GET(baseURL+"/health", si.GetHealth)
-	router.GET(baseURL+"/health/db", si.GetHealthDb)
-	router.GET(baseURL+"/records/:authUserId", si.GetRecordsWithAuthUserId)
-	router.GET(baseURL+"/search", si.GetSearch)
-	router.DELETE(baseURL+"/shelf/:authUserId", si.DeleteShelfWithAuthUserId)
-	router.GET(baseURL+"/shelf/:authUserId", si.GetShelfWithAuthUserId)
-	router.POST(baseURL+"/shelf/:authUserId", si.PostShelfAuthUserId)
-	router.PUT(baseURL+"/shelf/:authUserId", si.PutShelfWithAuthUserId)
-	router.PUT(baseURL+"/users", si.PutUsers)
-	router.DELETE(baseURL+"/users/:authUserId", si.DeleteUsersWithAuthUserId)
-	router.GET(baseURL+"/users/:authUserId", si.GetUsersWithAuthUserId)
+	router.POST(baseURL+"/auth/register", hi.PostAuthRegister)
+	router.GET(baseURL+"/charts/:authUserId", hi.GetChartsWithAuthUserId)
+	router.GET(baseURL+"/health", hi.GetHealth)
+	router.GET(baseURL+"/health/db", hi.GetHealthDb)
+	router.GET(baseURL+"/records/:authUserId", hi.GetRecordsWithAuthUserId)
+	router.GET(baseURL+"/search", hi.GetSearch)
+	router.DELETE(baseURL+"/shelf/:authUserId", hi.DeleteShelfWithAuthUserId)
+	router.GET(baseURL+"/shelf/:authUserId", hi.GetShelfWithAuthUserId)
+	router.POST(baseURL+"/shelf/:authUserId", hi.PostShelfAuthUserId)
+	router.PUT(baseURL+"/shelf/:authUserId", hi.PutShelfWithAuthUserId)
+	router.PUT(baseURL+"/users", hi.PutUsers)
+	router.DELETE(baseURL+"/users/:authUserId", hi.DeleteUsersWithAuthUserId)
+	router.GET(baseURL+"/users/:authUserId", hi.GetUsersWithAuthUserId)
 }
 
 type EchoRouter interface {

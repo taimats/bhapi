@@ -14,7 +14,7 @@ import (
 	"github.com/uptrace/bun"
 )
 
-func SetUpHandler(db *bun.DB) (*handler.Server, *echo.Echo) {
+func SetUpHandler(db *bun.DB) (*handler.Handler, *echo.Echo) {
 	//repositoryインスタンスの生成
 	cl := utils.NewTestClocker()
 	cr := repository.NewChart(db, cl)
@@ -32,7 +32,7 @@ func SetUpHandler(db *bun.DB) (*handler.Server, *echo.Echo) {
 	e.Validator = handler.NewCustomValidator(validator.New())
 
 	//hanlderの設定
-	server := handler.NewServer(uc, cc, rc, sc, sbc)
+	server := handler.NewHandler(uc, cc, rc, sc, sbc)
 
 	return server, e
 }

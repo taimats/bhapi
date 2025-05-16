@@ -10,7 +10,7 @@ import (
 	"github.com/taimats/bhapi/utils"
 )
 
-type Server struct {
+type Handler struct {
 	uc  *controller.User
 	cc  *controller.Chart
 	rc  *controller.Record
@@ -18,14 +18,14 @@ type Server struct {
 	sbc *controller.SearchBooks
 }
 
-func NewServer(
+func NewHandler(
 	uc *controller.User,
 	cc *controller.Chart,
 	rc *controller.Record,
 	sc *controller.Shelf,
 	sbc *controller.SearchBooks,
-) *Server {
-	return &Server{
+) *Handler {
+	return &Handler{
 		uc:  uc,
 		cc:  cc,
 		rc:  rc,
@@ -34,11 +34,11 @@ func NewServer(
 	}
 }
 
-var _ ServerInterface = (*Server)(nil)
+var _ HandlerInterface = (*Handler)(nil)
 
 // user情報の登録
 // (POST /auth/register)
-func (s *Server) PostAuthRegister(c echo.Context) error {
+func (h *Handler) PostAuthRegister(c echo.Context) error {
 	var u User
 	if err := c.Bind(&u); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "リクエストボディの読み込みに失敗")
@@ -51,7 +51,7 @@ func (s *Server) PostAuthRegister(c echo.Context) error {
 	ctx := c.Request().Context()
 	user := convertUser(&u)
 
-	err := s.uc.RegisterUser(ctx, user)
+	err := h.uc.RegisterUser(ctx, user)
 	if err != nil {
 		if errors.Is(err, utils.ErrAlrExists) {
 			return echo.NewHTTPError(http.StatusBadRequest, "すでにユーザーが存在します")
@@ -64,11 +64,11 @@ func (s *Server) PostAuthRegister(c echo.Context) error {
 
 // ユーザーごとにチャートデータを返す
 // (GET /charts/{AuthUserId})
-func (s *Server) GetChartsWithAuthUserId(c echo.Context) error {
+func (h *Handler) GetChartsWithAuthUserId(c echo.Context) error {
 	authUserId := c.Param("authUserId")
 	ctx := c.Request().Context()
 
-	chs, err := s.cc.GetCharts(ctx, authUserId)
+	chs, err := h.cc.GetCharts(ctx, authUserId)
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, "図表がありません")
@@ -82,7 +82,7 @@ func (s *Server) GetChartsWithAuthUserId(c echo.Context) error {
 
 // サーバーの監視
 // (GET /health)
-func (s *Server) GetHealth(c echo.Context) error {
+func (h *Handler) GetHealth(c echo.Context) error {
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "ok",
 	})
@@ -90,7 +90,7 @@ func (s *Server) GetHealth(c echo.Context) error {
 
 // DBサーバーの監視
 // (GET /health/db)
-func (s *Server) GetHealthDb(c echo.Context) error {
+func (h *Handler) GetHealthDb(c echo.Context) error {
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "ok",
 	})
@@ -98,11 +98,11 @@ func (s *Server) GetHealthDb(c echo.Context) error {
 
 // ユーザーごとに記録を返す
 // (GET /records/{AuthUserId})
-func (s *Server) GetRecordsWithAuthUserId(c echo.Context) error {
+func (h *Handler) GetRecordsWithAuthUserId(c echo.Context) error {
 	authUserId := c.Param("authUserId")
 	ctx := c.Request().Context()
 
-	record, err := s.rc.GetRecord(ctx, authUserId)
+	record, err := h.rc.GetRecord(ctx, authUserId)
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, "記録がありません")
@@ -115,7 +115,7 @@ func (s *Server) GetRecordsWithAuthUserId(c echo.Context) error {
 
 // 書籍の検索結果を取得
 // (GET /search)
-func (s *Server) GetSearch(c echo.Context) error {
+func (h *Handler) GetSearch(c echo.Context) error {
 	q := c.QueryParam("q")
 	if q == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "検索文字を入力ください")
@@ -124,7 +124,7 @@ func (s *Server) GetSearch(c echo.Context) error {
 	ctx := c.Request().Context()
 	baseURL := os.Getenv("GOOGL_BOOKS_API_URL")
 
-	results, err := s.sbc.SearchBooks(ctx, q, baseURL)
+	results, err := h.sbc.SearchBooks(ctx, q, baseURL)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "書籍の検索に失敗")
 	}
@@ -134,7 +134,7 @@ func (s *Server) GetSearch(c echo.Context) error {
 
 // ユーザーごとに本棚を複数削除
 // (DELETE /shelf/{AuthUserId})
-func (s *Server) DeleteShelfWithAuthUserId(c echo.Context) error {
+func (h *Handler) DeleteShelfWithAuthUserId(c echo.Context) error {
 	bookIds := c.QueryParams()["bookId"]
 	if len(bookIds) == 0 {
 		return echo.NewHTTPError(http.StatusBadRequest, "bookIdが必要です")
@@ -142,7 +142,7 @@ func (s *Server) DeleteShelfWithAuthUserId(c echo.Context) error {
 
 	ctx := c.Request().Context()
 
-	err := s.sc.DeleteShelf(ctx, bookIds)
+	err := h.sc.DeleteShelf(ctx, bookIds)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "本の削除に失敗")
 	}
@@ -152,11 +152,11 @@ func (s *Server) DeleteShelfWithAuthUserId(c echo.Context) error {
 
 // ユーザーごとに本棚を取得
 // (GET /shelf/{AuthUserId})
-func (s *Server) GetShelfWithAuthUserId(c echo.Context) error {
+func (h *Handler) GetShelfWithAuthUserId(c echo.Context) error {
 	authUserId := c.Param("authUserId")
 	ctx := c.Request().Context()
 
-	books, err := s.sc.GetShelf(ctx, authUserId)
+	books, err := h.sc.GetShelf(ctx, authUserId)
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, "本棚がありません")
@@ -171,7 +171,7 @@ func (s *Server) GetShelfWithAuthUserId(c echo.Context) error {
 
 // ユーザーごとに本を本棚に1冊ずつ作成
 // (POST /shelf/{authUserId})
-func (s *Server) PostShelfAuthUserId(c echo.Context) error {
+func (h *Handler) PostShelfAuthUserId(c echo.Context) error {
 	var b Book
 	if err := c.Bind(&b); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "リクエストボディの取得に失敗")
@@ -187,7 +187,7 @@ func (s *Server) PostShelfAuthUserId(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "本の変換に失敗")
 	}
 
-	err = s.sc.PostBookWithCharts(ctx, book)
+	err = h.sc.PostBookWithCharts(ctx, book)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "本の作成に失敗")
 	}
@@ -197,7 +197,7 @@ func (s *Server) PostShelfAuthUserId(c echo.Context) error {
 
 // ユーザーごとに本棚を1冊ずつ更新
 // (PUT /shelf/{AuthUserId})
-func (s *Server) PutShelfWithAuthUserId(c echo.Context) error {
+func (h *Handler) PutShelfWithAuthUserId(c echo.Context) error {
 	b := new(Book)
 	if err := c.Bind(b); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "リクエストボディの取得に失敗")
@@ -213,7 +213,7 @@ func (s *Server) PutShelfWithAuthUserId(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	err = s.sc.UpdateShelf(ctx, book)
+	err = h.sc.UpdateShelf(ctx, book)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "本の更新に失敗")
 	}
@@ -223,11 +223,11 @@ func (s *Server) PutShelfWithAuthUserId(c echo.Context) error {
 
 // ユーザーを削除
 // (DELETE /users/{AuthUserId})
-func (s *Server) DeleteUsersWithAuthUserId(c echo.Context) error {
+func (h *Handler) DeleteUsersWithAuthUserId(c echo.Context) error {
 	authUserId := c.Param("authUserId")
 	ctx := c.Request().Context()
 
-	err := s.uc.DeleteUser(ctx, authUserId)
+	err := h.uc.DeleteUser(ctx, authUserId)
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, "ユーザーがありません")
@@ -240,11 +240,11 @@ func (s *Server) DeleteUsersWithAuthUserId(c echo.Context) error {
 
 // ユーザー情報を返す
 // (GET /users/{AuthUserId})
-func (s *Server) GetUsersWithAuthUserId(c echo.Context) error {
+func (h *Handler) GetUsersWithAuthUserId(c echo.Context) error {
 	authUserId := c.Param("authUserId")
 	ctx := c.Request().Context()
 
-	user, err := s.uc.GetUser(ctx, authUserId)
+	user, err := h.uc.GetUser(ctx, authUserId)
 	if err != nil {
 		if errors.Is(err, utils.ErrNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, "ユーザーがありません")
@@ -256,7 +256,7 @@ func (s *Server) GetUsersWithAuthUserId(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
-func (s *Server) PutUsers(c echo.Context) error {
+func (h *Handler) PutUsers(c echo.Context) error {
 	u := new(User)
 	if err := c.Bind(u); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "リクエストボディの読み込みに失敗")
@@ -268,7 +268,7 @@ func (s *Server) PutUsers(c echo.Context) error {
 	ctx := c.Request().Context()
 	user := convertUser(u)
 
-	err := s.uc.UpdateUser(ctx, user)
+	err := h.uc.UpdateUser(ctx, user)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "ユーザーの更新に失敗")
 	}
