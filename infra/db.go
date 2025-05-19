@@ -24,7 +24,7 @@ func NewDBConfig() (dsn string) {
 	return dsn
 }
 
-func NewDatabaseConnection(dsn string) (*bun.DB, error) {
+func NewDBConn(dsn string) (*bun.DB, error) {
 	sqldb := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn)))
 
 	// データベース接続をテスト
@@ -32,14 +32,18 @@ func NewDatabaseConnection(dsn string) (*bun.DB, error) {
 		log.Fatalf("データベースの接続に失敗: %v", err)
 	}
 
-	db := bun.NewDB(sqldb, pgdialect.New())
+	bundb := bun.NewDB(sqldb, pgdialect.New())
 
-	// クエリーフックを追加することで、SQLを実行したクエリーが標準出力される
-	db.AddQueryHook(bundebug.NewQueryHook(
-		bundebug.WithVerbose(true),
+	isVerbose := false
+	env := os.Getenv("Env")
+	if env != "dev" {
+		isVerbose = true
+	}
+	bundb.AddQueryHook(bundebug.NewQueryHook(
+		bundebug.WithVerbose(isVerbose),
 	))
 
 	log.Println("データベースの接続に成功")
 
-	return db, nil
+	return bundb, nil
 }

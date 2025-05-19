@@ -41,7 +41,7 @@ func main() {
 
 	//データベースの接続設定
 	dsn := infra.NewDBConfig()
-	db, err := infra.NewDatabaseConnection(dsn)
+	db, err := infra.NewDBConn(dsn)
 	if err != nil {
 		log.Fatalf("データベースの接続に失敗:%s", err)
 	}

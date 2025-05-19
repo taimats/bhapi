@@ -17,7 +17,7 @@ func main() {
 	}
 
 	cfg := infra.NewDBConfig()
-	db, err := infra.NewDatabaseConnection(cfg)
+	db, err := infra.NewDBConn(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
