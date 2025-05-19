@@ -2,105 +2,113 @@ package repository_test
 
 import (
 	"context"
-	"log"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/taimats/bhapi/domain"
+	"github.com/taimats/bhapi/infra"
 	"github.com/taimats/bhapi/infra/repository"
 	"github.com/taimats/bhapi/testutils"
 	"github.com/taimats/bhapi/utils"
 )
 
-func TestMain(m *testing.M) {
-	err := testutils.DotEnv()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	code := m.Run()
-
-	os.Exit(code)
-}
-
 func TestCreateUser(t *testing.T) {
 	//Arrange
-	db := testutils.SetUpDBForRepository(t)
 	ctx := context.Background()
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbctr.Restore(ctx, t)
+	cl := utils.NewTestClocker()
+
 	user := &domain.User{
+		ID:         int64(1),
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 		Name:       "",
 		Email:      domain.Email("example@example.com"),
 		Password:   domain.Password(""),
 	}
-
-	t.Cleanup(func() {
-		db.Close()
-	})
-
-	cl := utils.NewTestClocker()
-	ur := repository.NewUser(db, cl)
+	sut := repository.NewUser(bundb, cl)
+	a := assert.New(t)
 
 	//Act
-	got, err := ur.CreateUser(ctx, user)
+	got, err := sut.CreateUser(ctx, user)
 
 	//Assert
-	assert.Nil(t, err)
-	assert.NotEqual(t, int64(0), got)
+	a.Equal(int64(1), got)
+	a.Nil(err)
 }
 
 func TestFindUserByAuthUserId(t *testing.T) {
 	//Arrange
-	db := testutils.SetUpDBForRepository(t)
 	ctx := context.Background()
-	t.Cleanup(func() { db.Close() })
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cl := utils.NewTestClocker()
 
 	user := &domain.User{
+		ID:         int64(1),
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 		Name:       "",
 		Email:      domain.Email("example@example.com"),
 		Password:   domain.Password(""),
+		CreatedAt:  cl.Now(),
+		UpdatedAt:  cl.Now(),
 	}
-
-	cl := utils.NewTestClocker()
-	ur := repository.NewUser(db, cl)
+	testutils.InsertTestData(ctx, t, bundb, user)
+	sut := repository.NewUser(bundb, cl)
 
 	a := assert.New(t)
 
 	//Act
-	got, err := ur.FindUserByAuthUserId(ctx, user.AuthUserId)
+	got, err := sut.FindUserByAuthUserId(ctx, user.AuthUserId)
 
 	//Assert
 	a.Nil(err)
-	a.Equal(user.Name, got.Name)
-	a.Equal(user.Password, got.Password)
-	a.Equal(user.Email, got.Email)
+	a.Equal(user, got)
 }
 
 func TestUpdateUser(t *testing.T) {
 	//Arrange
-	db := testutils.SetUpDBForRepository(t)
 	ctx := context.Background()
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
 	cl := utils.NewTestClocker()
 
-	t.Cleanup(func() { db.Close() })
-
 	user := &domain.User{
-		ID:         2,
+		ID:         int64(1),
+		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
+		Name:       "",
+		Email:      domain.Email("example@example.com"),
+		Password:   domain.Password(""),
+		CreatedAt:  cl.Now(),
+		UpdatedAt:  cl.Now(),
+	}
+	testutils.InsertTestData(ctx, t, bundb, user)
+
+	updatedUser := &domain.User{
+		ID:         int64(1),
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 		Name:       "update",
 		Email:      domain.Email("sample@example.com"),
 		Password:   domain.Password(""),
 		CreatedAt:  cl.Now(),
+		UpdatedAt:  cl.Now(),
 	}
 
-	ur := repository.NewUser(db, cl)
+	sut := repository.NewUser(bundb, cl)
 
 	a := assert.New(t)
 
 	//Act
-	err := ur.UpdateUser(ctx, user)
+	err = sut.UpdateUser(ctx, updatedUser)
 
 	//Assert
 	a.Nil(err)
@@ -108,26 +116,31 @@ func TestUpdateUser(t *testing.T) {
 
 func TestDeleteUser(t *testing.T) {
 	//Arrange
-	db := testutils.SetUpDBForRepository(t)
 	ctx := context.Background()
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
 	cl := utils.NewTestClocker()
 
-	t.Cleanup(func() { db.Close() })
-
 	user := &domain.User{
-		ID:         3,
+		ID:         int64(1),
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
-		Name:       "update",
-		Email:      domain.Email("sample@example.com"),
+		Name:       "",
+		Email:      domain.Email("example@example.com"),
 		Password:   domain.Password(""),
+		CreatedAt:  cl.Now(),
+		UpdatedAt:  cl.Now(),
 	}
+	testutils.InsertTestData(ctx, t, bundb, user)
 
-	ur := repository.NewUser(db, cl)
+	sut := repository.NewUser(bundb, cl)
 
 	a := assert.New(t)
 
 	//Act
-	err := ur.DleteUser(ctx, user)
+	err = sut.DleteUser(ctx, user)
 
 	//Assert
 	a.Nil(err)

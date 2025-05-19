@@ -16,12 +16,12 @@ func main() {
 		log.Fatalf(".envファイルの取得に失敗:%s", err)
 	}
 
-	cfg := infra.NewDBConfig()
-	db, err := infra.NewDBConn(cfg)
+	dsn := infra.NewPostgresDsn()
+	bundb, err := infra.NewBunDB(dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	defer bundb.Close()
 
 	models := []interface{}{
 		(*domain.User)(nil),
@@ -30,20 +30,20 @@ func main() {
 	}
 
 	var data []byte
-	data = append(data, modelsToByte(db, models)...)
+	data = append(data, modelsToByte(bundb, models)...)
 
 	if err = os.WriteFile("./infra/gen/schema.sql", data, 0777); err == nil {
 		log.Println("DBスキーマファイルを生成")
 	}
 }
 
-func modelsToByte(db *bun.DB, models []interface{}) []byte {
+func modelsToByte(bundb *bun.DB, models []interface{}) []byte {
 	var data []byte
 
 	for _, model := range models {
-		query := db.NewCreateTable().Model(model).WithForeignKeys()
+		query := bundb.NewCreateTable().Model(model).WithForeignKeys()
 
-		rawQuery, err := query.AppendQuery(db.Formatter(), nil)
+		rawQuery, err := query.AppendQuery(bundb.Formatter(), nil)
 		if err != nil {
 			log.Fatal(err)
 		}

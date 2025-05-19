@@ -130,9 +130,9 @@ func (sr *Shelf) UpdateBookWithCharts(ctx context.Context, book *domain.Book) er
 
 // 本の削除時、book_idで対応するチャートも削除
 func (sr *Shelf) DleteBooksWithCharts(ctx context.Context, books []*domain.Book) error {
-	var bookIds []int64
-	for _, b := range books {
-		bookIds = append(bookIds, b.ID)
+	bookIds := make([]int64, len(books))
+	for i, b := range books {
+		bookIds[i] = b.ID
 	}
 
 	//トランザクションの開始
