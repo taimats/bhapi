@@ -9,19 +9,17 @@ import (
 	"github.com/taimats/bhapi/infra"
 	"github.com/taimats/bhapi/infra/repository"
 	"github.com/taimats/bhapi/testutils"
-	"github.com/taimats/bhapi/utils"
 )
 
 func TestCreateUser(t *testing.T) {
 	//Arrange
 	ctx := context.Background()
+	dbctr.Restore(ctx, t)
 	bundb, err := infra.NewBunDB(dbctr.Dsn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer bundb.Close()
-	dbctr.Restore(ctx, t)
-	cl := utils.NewTestClocker()
 
 	user := &domain.User{
 		ID:         int64(1),
@@ -50,7 +48,6 @@ func TestFindUserByAuthUserId(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer bundb.Close()
-	cl := utils.NewTestClocker()
 
 	user := &domain.User{
 		ID:         int64(1),
@@ -83,7 +80,6 @@ func TestUpdateUser(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer bundb.Close()
-	cl := utils.NewTestClocker()
 
 	user := &domain.User{
 		ID:         int64(1),
@@ -126,7 +122,6 @@ func TestDeleteUser(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer bundb.Close()
-	cl := utils.NewTestClocker()
 
 	user := &domain.User{
 		ID:         int64(1),
