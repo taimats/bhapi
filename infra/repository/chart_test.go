@@ -19,6 +19,7 @@ func TestFindChartsByAuthUserId(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer bundb.Close()
 	charts := []*domain.Chart{
 		{
 			ID:         int64(1),

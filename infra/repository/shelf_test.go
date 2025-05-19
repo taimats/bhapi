@@ -19,6 +19,7 @@ func TestFindBooksByAuthUserID(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer bundb.Close()
 	authUserId := "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058"
 
 	books := []*domain.Book{
@@ -109,6 +110,7 @@ func TestCreateBookWithCharts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer bundb.Close()
 	book := &domain.Book{
 		ISBN10:     "4167110121",
 		ImageURL:   "http://books.google.com/books/content?id=TL3APAAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
@@ -161,6 +163,7 @@ func TestUpdateBookWithCharts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer bundb.Close()
 	book := &domain.Book{
 		ID:         int64(1),
 		ISBN10:     "4167110121",
@@ -234,6 +237,7 @@ func TestDleteBooksWithCharts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer bundb.Close()
 	books := []*domain.Book{
 		{
 			ID:         int64(1),

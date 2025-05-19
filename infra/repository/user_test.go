@@ -19,6 +19,7 @@ func TestCreateUser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer bundb.Close()
 	dbctr.Restore(ctx, t)
 	cl := utils.NewTestClocker()
 
@@ -48,6 +49,7 @@ func TestFindUserByAuthUserId(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer bundb.Close()
 	cl := utils.NewTestClocker()
 
 	user := &domain.User{
@@ -80,6 +82,7 @@ func TestUpdateUser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer bundb.Close()
 	cl := utils.NewTestClocker()
 
 	user := &domain.User{
@@ -122,6 +125,7 @@ func TestDeleteUser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer bundb.Close()
 	cl := utils.NewTestClocker()
 
 	user := &domain.User{
