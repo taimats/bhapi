@@ -67,7 +67,6 @@ func newDBContainer(ctx context.Context) (pctr *postgres.PostgresContainer, Term
 
 	//DBコンテナの取得
 	pctr, err = postgres.Run(ctx, "postgres:16",
-		// postgres.WithInitScripts(scripts...),
 		postgres.WithDatabase(dbName),
 		postgres.WithUsername(dbUser),
 		postgres.WithPassword(dbPassword),
