@@ -7,29 +7,20 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/taimats/bhapi/controller"
 	"github.com/taimats/bhapi/domain"
+	"github.com/taimats/bhapi/infra"
 	"github.com/taimats/bhapi/infra/repository"
 	"github.com/taimats/bhapi/testutils"
-	"github.com/taimats/bhapi/utils"
 )
 
 func TestRegisterUser(t *testing.T) {
 	//Arrange ***************
 	ctx := context.Background()
-	container, Terminate, err := testutils.SetUpDBContainer(ctx)
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { Terminate(container.Container) })
-
-	err = testutils.MigrateUp(container.DSN, MigrationsPath)
-	if err != nil {
-		t.Fatalf("マイグレーションに失敗:%s", err)
-	}
-
-	db := testutils.SetUpDBForController(t, container.DSN)
-	cl := utils.NewTestClocker()
-	ur := repository.NewUser(db, cl)
-	sut := controller.NewUser(ur)
+	defer bundb.Close()
 
 	user := &domain.User{
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
@@ -38,6 +29,8 @@ func TestRegisterUser(t *testing.T) {
 		Password:   domain.Password(""),
 	}
 
+	ur := repository.NewUser(bundb, cl)
+	sut := controller.NewUser(ur)
 	a := assert.New(t)
 
 	//Act ***************
@@ -50,21 +43,12 @@ func TestRegisterUser(t *testing.T) {
 func TestGetUser(t *testing.T) {
 	//Arrange ***************
 	ctx := context.Background()
-	container, Terminate, err := testutils.SetUpDBContainer(ctx)
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { Terminate(container.Container) })
-
-	err = testutils.MigrateUp(container.DSN, MigrationsPath)
-	if err != nil {
-		t.Fatalf("マイグレーションに失敗:%s", err)
-	}
-
-	db := testutils.SetUpDBForController(t, container.DSN)
-	cl := utils.NewTestClocker()
-	ur := repository.NewUser(db, cl)
-	sut := controller.NewUser(ur)
+	defer bundb.Close()
 
 	user := &domain.User{
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
@@ -72,9 +56,10 @@ func TestGetUser(t *testing.T) {
 		Email:      domain.Email("example@example.com"),
 		Password:   domain.Password(""),
 	}
+	testutils.InsertTestData(ctx, t, bundb, user)
 
-	testutils.InsertTestData(t, db, ctx, user)
-
+	ur := repository.NewUser(bundb, cl)
+	sut := controller.NewUser(ur)
 	a := assert.New(t)
 
 	//Act ***************
@@ -91,21 +76,12 @@ func TestGetUser(t *testing.T) {
 func TestUpdateUser(t *testing.T) {
 	//Arrange ***************
 	ctx := context.Background()
-	container, Terminate, err := testutils.SetUpDBContainer(ctx)
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { Terminate(container.Container) })
-
-	err = testutils.MigrateUp(container.DSN, MigrationsPath)
-	if err != nil {
-		t.Fatalf("マイグレーションに失敗:%s", err)
-	}
-
-	db := testutils.SetUpDBForController(t, container.DSN)
-	cl := utils.NewTestClocker()
-	ur := repository.NewUser(db, cl)
-	sut := controller.NewUser(ur)
+	defer bundb.Close()
 
 	user := &domain.User{
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
@@ -113,7 +89,7 @@ func TestUpdateUser(t *testing.T) {
 		Email:      domain.Email("example@example.com"),
 		Password:   domain.Password(""),
 	}
-	testutils.InsertTestData(t, db, ctx, user)
+	testutils.InsertTestData(ctx, t, bundb, user)
 
 	updatedUser := &domain.User{
 		ID:         int64(1),
@@ -124,6 +100,8 @@ func TestUpdateUser(t *testing.T) {
 		CreatedAt:  cl.Now(),
 	}
 
+	ur := repository.NewUser(bundb, cl)
+	sut := controller.NewUser(ur)
 	a := assert.New(t)
 
 	//Act ***************
@@ -136,21 +114,12 @@ func TestUpdateUser(t *testing.T) {
 func TestDeleteUser(t *testing.T) {
 	//Arrange ***************
 	ctx := context.Background()
-	container, Terminate, err := testutils.SetUpDBContainer(ctx)
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { Terminate(container.Container) })
-
-	err = testutils.MigrateUp(container.DSN, MigrationsPath)
-	if err != nil {
-		t.Fatalf("マイグレーションに失敗:%s", err)
-	}
-
-	db := testutils.SetUpDBForController(t, container.DSN)
-	cl := utils.NewTestClocker()
-	ur := repository.NewUser(db, cl)
-	sut := controller.NewUser(ur)
+	defer bundb.Close()
 
 	user := &domain.User{
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
@@ -158,8 +127,10 @@ func TestDeleteUser(t *testing.T) {
 		Email:      domain.Email("example@example.com"),
 		Password:   domain.Password(""),
 	}
-	testutils.InsertTestData(t, db, ctx, user)
+	testutils.InsertTestData(ctx, t, bundb, user)
 
+	ur := repository.NewUser(bundb, cl)
+	sut := controller.NewUser(ur)
 	a := assert.New(t)
 
 	//Act ***************

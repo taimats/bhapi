@@ -7,28 +7,22 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/taimats/bhapi/controller"
 	"github.com/taimats/bhapi/domain"
+	"github.com/taimats/bhapi/infra"
 	"github.com/taimats/bhapi/infra/repository"
 	"github.com/taimats/bhapi/testutils"
-	"github.com/taimats/bhapi/utils"
 )
 
 func TestPostBookWithCharts(t *testing.T) {
 	//Arrange ***************
 	ctx := context.Background()
-	container, Terminate, err := testutils.SetUpDBContainer(ctx)
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { Terminate(container.Container) })
+	defer bundb.Close()
 
-	err = testutils.MigrateUp(container.DSN, MigrationsPath)
-	if err != nil {
-		t.Fatalf("マイグレーションに失敗:%s", err)
-	}
-
-	db := testutils.SetUpDBForController(t, container.DSN)
-	cl := utils.NewTestClocker()
-	sr := repository.NewShelf(db, cl)
+	sr := repository.NewShelf(bundb, cl)
 	sut := controller.NewShelf(sr)
 
 	book := &domain.Book{
@@ -54,21 +48,12 @@ func TestPostBookWithCharts(t *testing.T) {
 func TestUpdateShelf(t *testing.T) {
 	//Arrange ***************
 	ctx := context.Background()
-	container, Terminate, err := testutils.SetUpDBContainer(ctx)
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { Terminate(container.Container) })
-
-	err = testutils.MigrateUp(container.DSN, MigrationsPath)
-	if err != nil {
-		t.Fatalf("マイグレーションに失敗:%s", err)
-	}
-
-	db := testutils.SetUpDBForController(t, container.DSN)
-	cl := utils.NewTestClocker()
-	sr := repository.NewShelf(db, cl)
-	sut := controller.NewShelf(sr)
+	defer bundb.Close()
 
 	book := &domain.Book{
 		ID:         int64(1),
@@ -81,14 +66,12 @@ func TestUpdateShelf(t *testing.T) {
 		BookStatus: domain.Read,
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 	}
-
 	charts := domain.NewChartsFromBook(book)
 	for _, c := range charts {
 		c.BookId = book.ID
 	}
-
-	testutils.InsertTestData(t, db, ctx, book)
-	testutils.InsertTestData(t, db, ctx, charts...)
+	testutils.InsertTestData(ctx, t, bundb, book)
+	testutils.InsertTestData(ctx, t, bundb, charts...)
 
 	updatedBook := &domain.Book{
 		ID:         int64(1),
@@ -103,6 +86,9 @@ func TestUpdateShelf(t *testing.T) {
 		CreatedAt:  cl.Now(),
 	}
 
+	sr := repository.NewShelf(bundb, cl)
+	sut := controller.NewShelf(sr)
+
 	a := assert.New(t)
 
 	//Act ***************
@@ -115,21 +101,12 @@ func TestUpdateShelf(t *testing.T) {
 func TestGetShelf(t *testing.T) {
 	//Arrange ***************
 	ctx := context.Background()
-	container, Terminate, err := testutils.SetUpDBContainer(ctx)
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { Terminate(container.Container) })
-
-	err = testutils.MigrateUp(container.DSN, MigrationsPath)
-	if err != nil {
-		t.Fatalf("マイグレーションに失敗:%s", err)
-	}
-
-	db := testutils.SetUpDBForController(t, container.DSN)
-	cl := utils.NewTestClocker()
-	sr := repository.NewShelf(db, cl)
-	sut := controller.NewShelf(sr)
+	defer bundb.Close()
 
 	book := &domain.Book{
 		ISBN10:     "4167110121",
@@ -141,9 +118,10 @@ func TestGetShelf(t *testing.T) {
 		BookStatus: domain.Read,
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 	}
+	testutils.InsertTestData(ctx, t, bundb, book)
 
-	testutils.InsertTestData(t, db, ctx, book)
-
+	sr := repository.NewShelf(bundb, cl)
+	sut := controller.NewShelf(sr)
 	a := assert.New(t)
 
 	//Act ***************
@@ -157,21 +135,12 @@ func TestGetShelf(t *testing.T) {
 func TestDeleteShelf(t *testing.T) {
 	//Arrange ***************
 	ctx := context.Background()
-	container, Terminate, err := testutils.SetUpDBContainer(ctx)
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { Terminate(container.Container) })
-
-	err = testutils.MigrateUp(container.DSN, MigrationsPath)
-	if err != nil {
-		t.Fatalf("マイグレーションに失敗:%s", err)
-	}
-
-	db := testutils.SetUpDBForController(t, container.DSN)
-	cl := utils.NewTestClocker()
-	sr := repository.NewShelf(db, cl)
-	sut := controller.NewShelf(sr)
+	defer bundb.Close()
 
 	book := &domain.Book{
 		ISBN10:     "4167110121",
@@ -183,7 +152,6 @@ func TestDeleteShelf(t *testing.T) {
 		BookStatus: domain.Read,
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 	}
-
 	charts := []*domain.Chart{
 		{
 			Label:      domain.ChartPrice,
@@ -210,12 +178,12 @@ func TestDeleteShelf(t *testing.T) {
 			BookId:     int64(1),
 		},
 	}
+	testutils.InsertTestData(ctx, t, bundb, book)
+	testutils.InsertTestData(ctx, t, bundb, charts...)
 
+	sr := repository.NewShelf(bundb, cl)
+	sut := controller.NewShelf(sr)
 	bookIds := []string{"1"}
-
-	testutils.InsertTestData(t, db, ctx, book)
-	testutils.InsertTestData(t, db, ctx, charts...)
-
 	a := assert.New(t)
 
 	//Act ***************

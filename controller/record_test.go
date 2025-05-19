@@ -7,28 +7,20 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/taimats/bhapi/controller"
 	"github.com/taimats/bhapi/domain"
+	"github.com/taimats/bhapi/infra"
 	"github.com/taimats/bhapi/infra/repository"
 	"github.com/taimats/bhapi/testutils"
-	"github.com/taimats/bhapi/utils"
 )
 
 func TestGetRecord(t *testing.T) {
 	//Arrange ***************
 	ctx := context.Background()
-	container, Terminate, err := testutils.SetUpDBContainer(ctx)
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { Terminate(container.Container) })
-
-	err = testutils.MigrateUp(container.DSN, MigrationsPath)
-	if err != nil {
-		t.Fatalf("マイグレーションに失敗:%s", err)
-	}
-
-	db := testutils.SetUpDBForController(t, container.DSN)
-	cl := utils.NewTestClocker()
-	sr := repository.NewShelf(db, cl)
+	defer bundb.Close()
 
 	books := []*domain.Book{
 		{
@@ -82,8 +74,7 @@ func TestGetRecord(t *testing.T) {
 			AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 		},
 	}
-
-	testutils.InsertTestData(t, db, ctx, books...)
+	testutils.InsertTestData(ctx, t, bundb, books...)
 
 	want := &domain.Record{
 		Costs:       3870,
@@ -94,6 +85,7 @@ func TestGetRecord(t *testing.T) {
 		PagesRead:   1220,
 	}
 
+	sr := repository.NewShelf(bundb, cl)
 	sut := controller.NewRecord(sr)
 	authUserId := "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058"
 
