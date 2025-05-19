@@ -40,8 +40,8 @@ func main() {
 	}
 
 	//データベースの接続設定
-	dsn := infra.NewDBConfig()
-	db, err := infra.NewDBConn(dsn)
+	dsn := infra.NewPostgresDsn()
+	db, err := infra.NewBunDB(dsn)
 	if err != nil {
 		log.Fatalf("データベースの接続に失敗:%s", err)
 	}

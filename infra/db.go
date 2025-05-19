@@ -12,7 +12,7 @@ import (
 	"github.com/uptrace/bun/extra/bundebug"
 )
 
-func NewDBConfig() (dsn string) {
+func NewPostgresDsn() (dsn string) {
 	u := os.Getenv("POSTGRES_USER")
 	pd := os.Getenv("POSTGRES_PASSWORD")
 	db := os.Getenv("POSTGRES_DB")
@@ -24,7 +24,7 @@ func NewDBConfig() (dsn string) {
 	return dsn
 }
 
-func NewDBConn(dsn string) (*bun.DB, error) {
+func NewBunDB(dsn string) (*bun.DB, error) {
 	sqldb := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn)))
 
 	// データベース接続をテスト
