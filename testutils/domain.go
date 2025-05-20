@@ -15,9 +15,10 @@ func PseudoGoogleBooksAPIServer(t *testing.T) *httptest.Server {
 		if err != nil {
 			t.Fatal(err)
 		}
+		jb := IndentForJSON(t, string(testData))
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		w.Write(testData)
+		w.Write(jb)
 	}))
 
 	return httptest.NewServer(mux)
