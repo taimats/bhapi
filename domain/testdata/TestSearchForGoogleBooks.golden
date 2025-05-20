@@ -1,0 +1,42 @@
+[
+  {
+    "isbn10": "4167110121",
+    "imageURL": "http://books.google.com/books/content?id=TL3APAAACAAJ\u0026printsec=frontcover\u0026img=1\u0026zoom=1\u0026source=gbs_api",
+    "title": "容疑者Xの献身",
+    "author": "東野圭吾",
+    "page": "0",
+    "price": "0"
+  },
+  {
+    "isbn10": "",
+    "imageURL": "http://books.google.com/books/content?id=eNjdDwAAQBAJ\u0026printsec=frontcover\u0026img=1\u0026zoom=1\u0026edge=curl\u0026source=gbs_api",
+    "title": "容疑者Xの献身",
+    "author": "東野圭吾",
+    "page": "234",
+    "price": "770"
+  },
+  {
+    "isbn10": "",
+    "imageURL": "http://books.google.com/books/content?id=hQDeDwAAQBAJ\u0026printsec=frontcover\u0026img=1\u0026zoom=1\u0026edge=curl\u0026source=gbs_api",
+    "title": "容疑者Xの献身　無料試し読み版",
+    "author": "東野圭吾",
+    "page": "49",
+    "price": "0"
+  },
+  {
+    "isbn10": "416711013X",
+    "imageURL": "http://books.google.com/books/content?id=1LcsAwEACAAJ\u0026printsec=frontcover\u0026img=1\u0026zoom=1\u0026source=gbs_api",
+    "title": "ガリレオの苦悩",
+    "author": "東野圭吾",
+    "page": "0",
+    "price": "0"
+  },
+  {
+    "isbn10": "4167110083",
+    "imageURL": "http://books.google.com/books/content?id=xdM9ywAACAAJ\u0026printsec=frontcover\u0026img=1\u0026zoom=1\u0026source=gbs_api",
+    "title": "予知夢",
+    "author": "東野圭吾",
+    "page": "0",
+    "price": "0"
+  }
+]
