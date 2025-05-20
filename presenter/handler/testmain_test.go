@@ -29,7 +29,7 @@ func TestMain(m *testing.M) {
 	}
 
 	ctx := context.Background()
-	migPath := "../../../infra/migrations"
+	migPath := "../../infra/migrations"
 	dbctr = testutils.SetupDBContainer(ctx, migPath)
 	cl = utils.NewTestClocker()
 
