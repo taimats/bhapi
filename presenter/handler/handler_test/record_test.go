@@ -1,29 +1,32 @@
 package handler_test
 
 import (
-	"bytes"
-	"encoding/json"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/sebdah/goldie/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/taimats/bhapi/domain"
+	"github.com/taimats/bhapi/infra"
 	"github.com/taimats/bhapi/testutils"
 )
 
 func TestGetRecordsWithAuthUserId(t *testing.T) {
 	//Arrange ***************
-	htls := testutils.PreSetUpForHandlerTest(t)
-	t.Cleanup(func() { htls.Terminate(htls.Container.Container) })
-
-	//handlerの準備
-	sut, e := testutils.SetUpHandler(htls.DB)
+	ctx := context.Background()
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer bundb.Close()
 
 	//テストデータの挿入
 	books := []*domain.Book{
 		{
+			ID:         int64(1),
 			ISBN10:     "4167110121",
 			ImageURL:   "http://books.google.com/books/content?id=TL3APAAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
 			Title:      "容疑者Xの献身",
@@ -32,8 +35,11 @@ func TestGetRecordsWithAuthUserId(t *testing.T) {
 			Price:      1640,
 			BookStatus: domain.Read,
 			AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
+			CreatedAt:  cl.Now(),
+			UpdatedAt:  cl.Now(),
 		},
 		{
+			ID:         int64(2),
 			ISBN10:     "",
 			ImageURL:   "http://books.google.com/books/content?id=eNjdDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
 			Title:      "容疑者Xの献身",
@@ -42,8 +48,11 @@ func TestGetRecordsWithAuthUserId(t *testing.T) {
 			Price:      770,
 			BookStatus: domain.Reading,
 			AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
+			CreatedAt:  cl.Now(),
+			UpdatedAt:  cl.Now(),
 		},
 		{
+			ID:         int64(3),
 			ISBN10:     "",
 			ImageURL:   "http://books.google.com/books/content?id=hQDeDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
 			Title:      "容疑者Xの献身　無料試し読み版",
@@ -52,8 +61,11 @@ func TestGetRecordsWithAuthUserId(t *testing.T) {
 			Price:      0,
 			BookStatus: domain.Bought,
 			AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
+			CreatedAt:  cl.Now(),
+			UpdatedAt:  cl.Now(),
 		},
 		{
+			ID:         int64(4),
 			ISBN10:     "416711013X",
 			ImageURL:   "http://books.google.com/books/content?id=1LcsAwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
 			Title:      "ガリレオの苦悩",
@@ -62,8 +74,11 @@ func TestGetRecordsWithAuthUserId(t *testing.T) {
 			Price:      1240,
 			BookStatus: domain.Read,
 			AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
+			CreatedAt:  cl.Now(),
+			UpdatedAt:  cl.Now(),
 		},
 		{
+			ID:         int64(5),
 			ISBN10:     "4167110083",
 			ImageURL:   "http://books.google.com/books/content?id=xdM9ywAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
 			Title:      "予知夢",
@@ -72,42 +87,25 @@ func TestGetRecordsWithAuthUserId(t *testing.T) {
 			Price:      220,
 			BookStatus: domain.Bought,
 			AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
+			CreatedAt:  cl.Now(),
+			UpdatedAt:  cl.Now(),
 		},
 	}
+	testutils.InsertTestData(ctx, t, bundb, books...)
 
-	testutils.InsertTestData(t, htls.DB, htls.Ctx, books...)
-
-	record := &domain.Record{
-		Costs:       3870,
-		CostsRead:   2880,
-		Volumes:     5,
-		VolumesRead: 2,
-		Pages:       1723,
-		PagesRead:   1220,
-	}
-	byteRecord, err := json.Marshal(record)
-	if err != nil {
-		t.Fatalf("json変換に失敗%s", err)
-	}
-	var expected bytes.Buffer
-	expected.Write(byteRecord)
-	expected.Write([]byte("\n"))
-
-	//request, resposeの準備
-	r := httptest.NewRequest(http.MethodGet, "/records", nil)
-	r.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	w := httptest.NewRecorder()
-	c := e.NewContext(r, w)
-	c.SetParamNames("authUserId")
-	c.SetParamValues("c0cc3f0c-9a02-45ba-9de7-7d7276bb6058")
+	sut, e := testutils.SetupHandler(bundb)
+	r := httptest.NewRequest(http.MethodGet, "/records/c0cc3f0c-9a02-45ba-9de7-7d7276bb6058", nil)
+	c, w := testutils.EchoContextWithRecorder(r, e)
 
 	a := assert.New(t)
+	g := goldie.New(t, goldie.WithDiffEngine(goldie.ColoredDiff))
 
 	//Act ***************
 	err = sut.GetRecordsWithAuthUserId(c)
 
 	//Assert ***************
+	resBody := testutils.IndentForJSON(t, w.Body.String())
 	a.Nil(err)
 	a.Equal(http.StatusOK, w.Code)
-	a.Equal(expected.Bytes(), w.Body.Bytes())
+	g.Assert(t, t.Name(), resBody)
 }

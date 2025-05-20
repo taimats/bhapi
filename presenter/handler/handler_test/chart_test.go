@@ -1,25 +1,27 @@
 package handler_test
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/sebdah/goldie/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/taimats/bhapi/domain"
+	"github.com/taimats/bhapi/infra"
 	"github.com/taimats/bhapi/testutils"
 )
 
 func TestGetChartsWithAuthUserId(t *testing.T) {
-	//Arrange ***************
-	htls := testutils.PreSetUpForHandlerTest(t)
-	t.Cleanup(func() { htls.Terminate(htls.Container.Container) })
+	ctx := context.Background()
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer bundb.Close()
 
-	//handlerの準備
-	sut, e := testutils.SetUpHandler(htls.DB)
-
-	//テストデータの挿入
 	charts := []*domain.Chart{
 		{
 			Label:      domain.ChartPrice,
@@ -70,23 +72,23 @@ func TestGetChartsWithAuthUserId(t *testing.T) {
 			BookId:     int64(1),
 		},
 	}
-	testutils.InsertTestData(t, htls.DB, htls.Ctx, charts...)
+	testutils.InsertTestData(ctx, t, bundb, charts...)
 
-	//request, resposeの準備
-	r := httptest.NewRequest(http.MethodGet, "/charts", nil)
-	r.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	w := httptest.NewRecorder()
-	c := e.NewContext(r, w)
+	sut, e := testutils.SetupHandler(bundb)
+	r := httptest.NewRequest(http.MethodGet, "/charts/:authUserId", nil)
+	c, w := testutils.EchoContextWithRecorder(r, e)
 	c.SetParamNames("authUserId")
 	c.SetParamValues("c0cc3f0c-9a02-45ba-9de7-7d7276bb6058")
 
 	a := assert.New(t)
+	g := goldie.New(t, goldie.WithDiffEngine(goldie.ColoredDiff))
 
 	//Act ***************
-	err := sut.GetChartsWithAuthUserId(c)
+	err = sut.GetChartsWithAuthUserId(c)
+	resBody := testutils.IndentForJSON(t, w.Body.String())
 
 	//Assert ***************
 	a.Nil(err)
 	a.Equal(http.StatusOK, w.Code)
-	a.NotEmpty(w.Body.Bytes())
+	g.Assert(t, t.Name(), resBody)
 }

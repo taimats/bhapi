@@ -1,69 +1,67 @@
 package handler_test
 
 import (
-	"fmt"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/sebdah/goldie/v2"
 	"github.com/stretchr/testify/assert"
+	"github.com/taimats/bhapi/infra"
 	"github.com/taimats/bhapi/testutils"
 )
 
 func TestGetHealth(t *testing.T) {
-	t.Parallel()
 	//Arrange ***************
-	htls := testutils.PreSetUpForHandlerTest(t)
-	t.Cleanup(func() { htls.Terminate(htls.Container.Container) })
+	ctx := context.Background()
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer bundb.Close()
 
-	//handlerの準備
-	sut, e := testutils.SetUpHandler(htls.DB)
-
-	//request, resposeの準備
+	sut, e := testutils.SetupHandler(bundb)
 	r := httptest.NewRequest(http.MethodGet, "/health", nil)
-	r.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	w := httptest.NewRecorder()
-	c := e.NewContext(r, w)
-
-	//assert時の評価データ
-	expected := fmt.Sprintf("%s\n", `{"message":"ok"}`)
+	c, w := testutils.EchoContextWithRecorder(r, e)
 
 	a := assert.New(t)
+	g := goldie.New(t, goldie.WithDiffEngine(goldie.ColoredDiff))
 
 	//Act ***************
-	err := sut.GetHealth(c)
+	err = sut.GetHealth(c)
+	resBody := testutils.IndentForJSON(t, w.Body.String())
 
 	//Assert ***************
 	a.Nil(err)
 	a.Equal(http.StatusOK, w.Code)
-	a.Equal(expected, w.Body.String())
+	g.Assert(t, t.Name(), resBody)
 }
 
 func TestGetHealthDb(t *testing.T) {
 	//Arrange ***************
-	htls := testutils.PreSetUpForHandlerTest(t)
-	t.Cleanup(func() { htls.Terminate(htls.Container.Container) })
+	ctx := context.Background()
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer bundb.Close()
 
-	//handlerの準備
-	sut, e := testutils.SetUpHandler(htls.DB)
-
-	//request, resposeの準備
+	sut, e := testutils.SetupHandler(bundb)
 	r := httptest.NewRequest(http.MethodGet, "/health/db", nil)
-	r.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	w := httptest.NewRecorder()
-	c := e.NewContext(r, w)
-
-	//assert時の評価データ
-	expected := fmt.Sprintf("%s\n", `{"message":"ok"}`)
+	c, w := testutils.EchoContextWithRecorder(r, e)
 
 	a := assert.New(t)
+	g := goldie.New(t, goldie.WithDiffEngine(goldie.ColoredDiff))
 
 	//Act ***************
-	err := sut.GetHealth(c)
+	err = sut.GetHealthDb(c)
+	resBody := testutils.IndentForJSON(t, w.Body.String())
 
 	//Assert ***************
 	a.Nil(err)
 	a.Equal(http.StatusOK, w.Code)
-	a.Equal(expected, w.Body.String())
+	g.Assert(t, t.Name(), resBody)
 }

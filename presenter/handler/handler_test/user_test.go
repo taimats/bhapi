@@ -1,42 +1,45 @@
 package handler_test
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/sebdah/goldie/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/taimats/bhapi/domain"
+	"github.com/taimats/bhapi/infra"
 	"github.com/taimats/bhapi/presenter/handler"
 	"github.com/taimats/bhapi/testutils"
 )
 
 func TestPostAuthRegister(t *testing.T) {
 	//Arrange ***************
-	htls := testutils.PreSetUpForHandlerTest(t)
-	t.Cleanup(func() { htls.Terminate(htls.Container.Container) })
-
-	//handlerの準備
-	sut, e := testutils.SetUpHandler(htls.DB)
+	ctx := context.Background()
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer bundb.Close()
 
 	//リクエストボディの準備
 	u := &handler.User{
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 		Email:      "example@example.com",
 	}
-	body := testutils.ConvertForJSON(t, u)
+	jb := testutils.ConvertToJSON(t, u)
 
 	//request, resposeの準備
-	r := httptest.NewRequest(http.MethodPost, "/auth/register", &body)
-	r.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	w := httptest.NewRecorder()
-	c := e.NewContext(r, w)
+	sut, e := testutils.SetupHandler(bundb)
+	r := httptest.NewRequest(http.MethodPost, "/auth/register", &jb)
+	c, w := testutils.EchoContextWithRecorder(r, e)
 
 	a := assert.New(t)
 
 	//Act ***************
-	err := sut.PostAuthRegister(c)
+	err = sut.PostAuthRegister(c)
 
 	//Assert ***************
 	a.Nil(err)
@@ -46,65 +49,72 @@ func TestPostAuthRegister(t *testing.T) {
 
 func TestGetUsersWithAuthUserId(t *testing.T) {
 	//Arrange ***************
-	htls := testutils.PreSetUpForHandlerTest(t)
-	t.Cleanup(func() { htls.Terminate(htls.Container.Container) })
+	ctx := context.Background()
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer bundb.Close()
 
 	//テストデータの挿入
 	u := &domain.User{
+		ID:         int64(1),
+		Name:       "example",
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 		Email:      "example@example.com",
+		Password:   "7d7276bb6058",
+		CreatedAt:  cl.Now(),
+		UpdatedAt:  cl.Now(),
 	}
-	testutils.InsertTestData(t, htls.DB, htls.Ctx, u)
+	testutils.InsertTestData(ctx, t, bundb, u)
 
-	//handlerの準備
-	sut, e := testutils.SetUpHandler(htls.DB)
-
-	//request, resposeの準備
-	r := httptest.NewRequest(http.MethodGet, "/users/", nil)
-	r.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	w := httptest.NewRecorder()
-	c := e.NewContext(r, w)
+	sut, e := testutils.SetupHandler(bundb)
+	r := httptest.NewRequest(http.MethodGet, "/users/:authUserId", nil)
+	c, w := testutils.EchoContextWithRecorder(r, e)
 	c.SetParamNames("authUserId")
 	c.SetParamValues("c0cc3f0c-9a02-45ba-9de7-7d7276bb6058")
 
 	a := assert.New(t)
+	g := goldie.New(t, goldie.WithDiffEngine(goldie.ColoredDiff))
 
 	//Act ***************
-	err := sut.GetUsersWithAuthUserId(c)
+	err = sut.GetUsersWithAuthUserId(c)
 
 	//Assert ***************
+	resBody := testutils.IndentForJSON(t, w.Body.String())
 	a.Nil(err)
 	a.Equal(http.StatusOK, w.Code)
-	a.NotEmpty(w.Body.Bytes())
+	g.Assert(t, t.Name(), resBody)
 }
 
 func TestDeleteUsersWithAuthUserId(t *testing.T) {
 	//Arrange ***************
-	htls := testutils.PreSetUpForHandlerTest(t)
-	t.Cleanup(func() { htls.Terminate(htls.Container.Container) })
+	ctx := context.Background()
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer bundb.Close()
 
 	//テストデータの挿入
 	u := &domain.User{
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 		Email:      "example@example.com",
 	}
-	testutils.InsertTestData(t, htls.DB, htls.Ctx, u)
+	testutils.InsertTestData(ctx, t, bundb, u)
 
-	//handlerの準備
-	sut, e := testutils.SetUpHandler(htls.DB)
-
-	//request, resposeの準備
-	r := httptest.NewRequest(http.MethodDelete, "/users/", nil)
-	r.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	w := httptest.NewRecorder()
-	c := e.NewContext(r, w)
+	sut, e := testutils.SetupHandler(bundb)
+	r := httptest.NewRequest(http.MethodDelete, "/users/:authUserId", nil)
+	c, w := testutils.EchoContextWithRecorder(r, e)
 	c.SetParamNames("authUserId")
 	c.SetParamValues("c0cc3f0c-9a02-45ba-9de7-7d7276bb6058")
 
 	a := assert.New(t)
 
 	//Act ***************
-	err := sut.DeleteUsersWithAuthUserId(c)
+	err = sut.DeleteUsersWithAuthUserId(c)
 
 	//Assert ***************
 	a.Nil(err)
@@ -114,41 +124,41 @@ func TestDeleteUsersWithAuthUserId(t *testing.T) {
 
 func TestPutUsers(t *testing.T) {
 	//Arrange ***************
-	htls := testutils.PreSetUpForHandlerTest(t)
-	t.Cleanup(func() { htls.Terminate(htls.Container.Container) })
+	ctx := context.Background()
+	dbctr.Restore(ctx, t)
+	bundb, err := infra.NewBunDB(dbctr.Dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer bundb.Close()
 
 	//テストデータの挿入
 	u := &domain.User{
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 		Email:      "example@example.com",
 	}
-	testutils.InsertTestData(t, htls.DB, htls.Ctx, u)
+	testutils.InsertTestData(ctx, t, bundb, u)
 
 	//リクエストボディの準備
-	uu := &handler.User{
+	updatedUser := &handler.User{
 		Id:         "1",
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 		Email:      "example@example.com",
 		Name:       "updated",
 	}
-	body := testutils.ConvertForJSON(t, uu)
+	jb := testutils.ConvertToJSON(t, updatedUser)
 
-	//handlerの準備
-	sut, e := testutils.SetUpHandler(htls.DB)
-
-	//request, resposeの準備
-	r := httptest.NewRequest(http.MethodPut, "/users", &body)
-	r.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	w := httptest.NewRecorder()
-	c := e.NewContext(r, w)
+	sut, e := testutils.SetupHandler(bundb)
+	r := httptest.NewRequest(http.MethodPut, "/users", &jb)
+	c, w := testutils.EchoContextWithRecorder(r, e)
 
 	a := assert.New(t)
 
 	//Act ***************
-	err := sut.PutUsers(c)
+	err = sut.PutUsers(c)
 
 	//Assert ***************
 	a.Nil(err)
 	a.Equal(http.StatusOK, w.Code)
-	a.Empty(w.Body.String())
+	a.Empty(w.Body.Bytes())
 }
