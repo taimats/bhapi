@@ -1,0 +1,76 @@
+name: Test
+
+on:
+  pull_request:
+    branches: 
+      - main
+    paths: 
+      - "**/*.go"
+
+permissions: {}
+
+jobs:
+    staticcheck:
+        permissions:
+            contents: read
+            actions: read
+        env:
+          GO_BIN: "${{ github.workspace }}/.go/bin"
+        timeout-minutes: 20
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-go@v5
+              with:
+                go-version: "go.mod"
+
+            - name: Cache go staticheck module
+              id: staticcheck-cache
+              uses: actions/cache@v4
+              with:
+                path: ${{ env.GO_BIN }}
+                key: ${{ runner.os }}-staticcheck-${{ hashFiles('**/go.mod') }}
+            
+            - name: Install staticcheck
+              if: ${{ steps.staticcheck-cache.outputs.cache-hit != 'true' }}
+              run: GOBIN=${{ env.GO_BIN }} go install honnef.co/go/tools/cmd/staticcheck@latest
+            
+            - name: Check source files
+              run: ${{ env.GO_BIN }}/staticcheck ./...
+    
+    test:
+        needs: staticcheck
+        permissions:
+            contents: read
+            actions: read
+        
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-go@v5
+              with:
+                go-version: "go.mod"
+            
+            - name: Set a gomodcache path
+              id: gomodpath
+              run: go env GOMODCACHE >> $GITHUB_OUTPUT
+      
+            - name: Cache go dependencies
+              id: gomodcache
+              uses: actions/cache@v4
+              env:
+                GOMODCACHE: ${{ steps.gomodpath.outputs }}
+              with:
+                path: ${{ env.GOMODCACHE }}
+                key: ${{ runner.os }}-gomodcache-${{ hashFiles('**/go.mod') }}
+            
+            - name: Resolve go dependencies
+              if: ${{ steps.gomodcache.outputs.cache-hit != 'true' }}
+              run: go mod tidy
+            
+            - name: Test
+              run: go test ./...
+
+        
+
