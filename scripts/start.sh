@@ -11,7 +11,6 @@ source ./.env
 # go関連の処理
 cd ${SERVER_DIR}
 go mod download
-go mod tidy
 
 # アプリ起動
 go clean -cache && go build -o ${EXECUTE_PATH} -trimpath -ldflags "-w -s"

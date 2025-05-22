@@ -10,13 +10,11 @@ on:
 permissions: {}
 
 jobs:
-    staticcheck:
+    golangci:
         permissions:
             contents: read
             actions: read
-        env:
-          GO_BIN: "${{ github.workspace }}/.go/bin"
-        timeout-minutes: 20
+        timeout-minutes: 10
         runs-on: ubuntu-latest
 
         steps:
@@ -24,53 +22,34 @@ jobs:
             - uses: actions/setup-go@v5
               with:
                 go-version: "go.mod"
-
-            - name: Cache go staticheck module
-              id: staticcheck-cache
-              uses: actions/cache@v4
+                cache: true
+                cache-dependency-path: |
+                  **/go.sum
+                  **/go.mod
+            - name: golangci-lint
+              uses: golangci/golangci-lint-action@v8
               with:
-                path: ${{ env.GO_BIN }}
-                key: ${{ runner.os }}-staticcheck-${{ hashFiles('**/go.mod') }}
-            
-            - name: Install staticcheck
-              if: ${{ steps.staticcheck-cache.outputs.cache-hit != 'true' }}
-              run: GOBIN=${{ env.GO_BIN }} go install honnef.co/go/tools/cmd/staticcheck@latest
-            
-            - name: Check source files
-              run: ${{ env.GO_BIN }}/staticcheck ./...
-    
+                version: v2.1
     test:
-        needs: staticcheck
+        needs: golangci
         permissions:
             contents: read
             actions: read
-        
+        timeout-minutes: 15
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
             - uses: actions/setup-go@v5
               with:
                 go-version: "go.mod"
-            
-            - name: Set a gomodcache path
-              id: gomodpath
-              run: go env GOMODCACHE >> $GITHUB_OUTPUT
-      
-            - name: Cache go dependencies
-              id: gomodcache
-              uses: actions/cache@v4
-              env:
-                GOMODCACHE: ${{ steps.gomodpath.outputs }}
-              with:
-                path: ${{ env.GOMODCACHE }}
-                key: ${{ runner.os }}-gomodcache-${{ hashFiles('**/go.mod') }}
-            
-            - name: Resolve go dependencies
-              if: ${{ steps.gomodcache.outputs.cache-hit != 'true' }}
-              run: go mod tidy
-            
+                cache: true
+                cache-dependency-path: |
+                  **/go.sum
+                  **/go.mod
+            - name: Resolve dependencies
+              run: go mod download
             - name: Test
-              run: go test ./...
+              run: go test -cover ./...
 
         
 
