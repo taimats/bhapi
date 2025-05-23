@@ -1,9 +1,9 @@
 {
-  "ID": 1,
-  "AuthUserId": "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
-  "Name": "example",
-  "Email": "example@example.com",
-  "Password": "7d7276bb6058",
-  "CreatedAt": "2024-02-05T14:43:00+09:00",
-  "UpdatedAt": "2024-02-05T14:43:00+09:00"
+  "id": "1",
+  "authUserId": "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
+  "name": "example",
+  "email": "xxxx@xxxx",
+  "password": "xxxxxxxxx",
+  "createdAt": "2024-02-05T14:43:00+09:00",
+  "updatedAt": "2024-02-05T14:43:00+09:00"
 }

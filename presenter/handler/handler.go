@@ -256,7 +256,7 @@ func (h *Handler) GetUsersWithAuthUserId(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "ユーザーの取得に失敗")
 	}
 
-	return c.JSON(http.StatusOK, user)
+	return c.JSON(http.StatusOK, tweakUserForJSON(user))
 }
 
 func (h *Handler) PutUsers(c echo.Context) error {
