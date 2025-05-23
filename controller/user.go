@@ -19,7 +19,7 @@ func NewUser(ur *repository.User) *User {
 func (uc *User) RegisterUser(ctx context.Context, user *domain.User) error {
 	_, err := uc.ur.FindUserByAuthUserId(ctx, user.AuthUserId)
 	if err == nil {
-		return utils.NewErrAlrExists()
+		return utils.NewErrChains(utils.ErrAlrExists, nil)
 	}
 
 	_, err = uc.ur.CreateUser(ctx, user)

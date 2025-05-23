@@ -28,7 +28,7 @@ func (ur *User) FindUserByAuthUserId(ctx context.Context, authUserId string) (*d
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, utils.NewErrNotFound()
+			return nil, utils.NewErrChains(utils.ErrNotFound, err)
 		}
 	}
 
