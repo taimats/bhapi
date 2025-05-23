@@ -134,8 +134,12 @@ func TestPutUsers(t *testing.T) {
 
 	//テストデータの挿入
 	u := &domain.User{
+		ID:         int64(1),
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 		Email:      "example@example.com",
+		Password:   "",
+		CreatedAt:  cl.Now(),
+		UpdatedAt:  cl.Now(),
 	}
 	testutils.InsertTestData(ctx, t, bundb, u)
 
@@ -145,6 +149,7 @@ func TestPutUsers(t *testing.T) {
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 		Email:      "example@example.com",
 		Name:       "updated",
+		CreatedAt:  cl.NowString(),
 	}
 	jb := testutils.ConvertToJSON(t, updatedUser)
 

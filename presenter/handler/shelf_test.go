@@ -126,28 +126,37 @@ func TestPutShelfWithAuthUserId(t *testing.T) {
 	}
 	charts := []*domain.Chart{
 		{
+			ID:         int64(1),
 			Label:      domain.ChartPrice,
 			Year:       2025,
 			Month:      2,
 			Data:       980,
 			AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 			BookId:     int64(1),
+			CreatedAt:  cl.Now(),
+			UpdatedAt:  cl.Now(),
 		},
 		{
+			ID:         int64(2),
 			Label:      domain.ChartVolumes,
 			Year:       2025,
 			Month:      2,
 			Data:       1,
 			AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 			BookId:     int64(1),
+			CreatedAt:  cl.Now(),
+			UpdatedAt:  cl.Now(),
 		},
 		{
+			ID:         int64(3),
 			Label:      domain.ChartPages,
 			Year:       2025,
 			Month:      2,
 			Data:       247,
 			AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
 			BookId:     int64(1),
+			CreatedAt:  cl.Now(),
+			UpdatedAt:  cl.Now(),
 		},
 	}
 	testutils.InsertTestData(ctx, t, bundb, book)
@@ -164,8 +173,8 @@ func TestPutShelfWithAuthUserId(t *testing.T) {
 		Price:      "980",
 		BookStatus: "read",
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
-		CreatedAt:  cl.Now().String(),
-		UpdatedAt:  cl.Now().String(),
+		CreatedAt:  cl.NowString(),
+		UpdatedAt:  cl.NowString(),
 	}
 	jb := testutils.ConvertToJSON(t, body)
 

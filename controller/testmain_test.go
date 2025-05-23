@@ -12,7 +12,7 @@ import (
 
 var (
 	dbctr *testutils.DBContainer
-	cl    *utils.TestClocker
+	cl    utils.TestClocker
 )
 
 // パッケージ内で共通する前後処理

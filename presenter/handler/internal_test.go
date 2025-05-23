@@ -38,8 +38,8 @@ func TestTweakBooksForJSON(t *testing.T) {
 			Price:      "8,800",
 			BookStatus: "bought",
 			AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
-			CreatedAt:  "2024-02-05 14:43:00",
-			UpdatedAt:  "2024-02-05 14:43:00",
+			CreatedAt:  cl.NowString(),
+			UpdatedAt:  cl.NowString(),
 		},
 	}
 

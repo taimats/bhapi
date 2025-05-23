@@ -11,50 +11,75 @@ import (
 	"golang.org/x/text/message"
 )
 
-func convertUser(u *User) *domain.User {
-	const layout = "2006-01-02 15:04:05"
-	ca, err := time.Parse(layout, u.CreatedAt)
-	if err != nil {
-		ca = time.Now()
+// Json形式のUserをドメインのUser型に変換
+func convertUser(u *User) (*domain.User, error) {
+	var err error
+
+	var id int64 = 0
+	if u.Id != "" {
+		id, err = strconv.ParseInt(u.Id, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("idの数値変換に失敗:%w", err)
+		}
+	}
+	ca := time.Time{}
+	if u.CreatedAt != "" {
+		ca, err = time.Parse(time.RFC3339, u.CreatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("stringからtime型への変換に失敗:%w", err)
+		}
+	}
+	ua := time.Time{}
+	if u.UpdatedAt != "" {
+		ua, err = time.Parse(time.RFC3339, u.UpdatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("stringからtime型への変換に失敗:%w", err)
+		}
 	}
 
 	return &domain.User{
-		ID:         int64(0),
+		ID:         id,
 		AuthUserId: u.AuthUserId,
 		Name:       u.Name,
 		Email:      domain.Email(u.Email),
 		Password:   domain.Password(u.Password),
 		CreatedAt:  ca,
-	}
+		UpdatedAt:  ua,
+	}, nil
 }
 
+// Json形式BookをドメインのBook型に変換
 func convertBook(b *Book) (*domain.Book, error) {
-	price, err := strconv.Atoi(strings.Replace(b.Price, ",", "", -1))
-	if err != nil {
-		return nil, fmt.Errorf("priceの数値変換に失敗:%w", err)
-	}
+	var err error
 
-	page, err := strconv.Atoi(strings.Replace(b.Page, ",", "", -1))
-	if err != nil {
-		return nil, fmt.Errorf("pageの数値変換に失敗:%w", err)
-	}
-
-	var id int64
+	var id int64 = 0
 	if b.Id != "" {
 		id, err = strconv.ParseInt(b.Id, 10, 64)
 		if err != nil {
 			return nil, fmt.Errorf("idの数値変換に失敗:%w", err)
 		}
 	}
-
-	const layout = "2006-01-02 15:04:05"
-	ca, err := time.Parse(layout, b.CreatedAt)
+	price, err := strconv.Atoi(strings.ReplaceAll(b.Price, ",", ""))
 	if err != nil {
-		ca = time.Now()
+		return nil, fmt.Errorf("priceの数値変換に失敗:%w", err)
 	}
-	ua, err := time.Parse(layout, b.UpdatedAt)
+	page, err := strconv.Atoi(strings.ReplaceAll(b.Price, ",", ""))
 	if err != nil {
-		ua = time.Now()
+		return nil, fmt.Errorf("pageの数値変換に失敗:%w", err)
+	}
+	ca := time.Time{}
+	if b.CreatedAt != "" {
+		ca, err = time.Parse(time.RFC3339, b.CreatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("stringからtime型への変換に失敗:%w", err)
+		}
+	}
+	ua := time.Time{}
+	if b.UpdatedAt != "" {
+		ua, err = time.Parse(time.RFC3339, b.UpdatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("stringからtime型への変換に失敗:%w", err)
+		}
 	}
 
 	book := &domain.Book{
@@ -74,6 +99,7 @@ func convertBook(b *Book) (*domain.Book, error) {
 	return book, nil
 }
 
+// ドメインBook型の配列をJson形式用に調整
 func tweakBooksForJSON(books []*domain.Book) []*Book {
 	if len(books) == 0 {
 		return []*Book{}
@@ -81,8 +107,6 @@ func tweakBooksForJSON(books []*domain.Book) []*Book {
 
 	//3桁カンマ区切りで出力するためのfmt拡張
 	fmtx := message.NewPrinter(language.Japanese)
-
-	const layout = "2006-01-02 15:04:05"
 
 	updateBooks := make([]*Book, len(books))
 	for i, book := range books {
@@ -96,16 +120,16 @@ func tweakBooksForJSON(books []*domain.Book) []*Book {
 			Price:      fmtx.Sprint(book.Price),
 			BookStatus: string(book.BookStatus),
 			AuthUserId: book.AuthUserId,
-			CreatedAt:  book.CreatedAt.Format(layout),
-			UpdatedAt:  book.UpdatedAt.Format(layout),
+			CreatedAt:  book.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:  book.UpdatedAt.Format(time.RFC3339),
 		}
-
 		updateBooks[i] = b
 	}
 
 	return updateBooks
 }
 
+// ドメインRecord型の配列をJson形式に調整
 func tweakRecordForJSON(dr *domain.Record) *Record {
 	//3桁カンマ区切りで出力するためのfmt拡張
 	fmtx := message.NewPrinter(language.Japanese)
@@ -122,6 +146,7 @@ func tweakRecordForJSON(dr *domain.Record) *Record {
 	return record
 }
 
+// ドメインCharts型の配列をJson形式に調整
 func tweakChartsForJSON(chs []*domain.Chart) []*Chart {
 	charts := make([]*Chart, len(chs))
 

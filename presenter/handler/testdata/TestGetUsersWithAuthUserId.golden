@@ -4,6 +4,6 @@
   "Name": "example",
   "Email": "example@example.com",
   "Password": "7d7276bb6058",
-  "CreatedAt": "2024-02-05T14:43:00Z",
-  "UpdatedAt": "2024-02-05T14:43:00Z"
+  "CreatedAt": "2024-02-05T14:43:00+09:00",
+  "UpdatedAt": "2024-02-05T14:43:00+09:00"
 }

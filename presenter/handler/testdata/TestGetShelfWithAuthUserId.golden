@@ -9,7 +9,7 @@
     "price": "980",
     "bookStatus": "read",
     "authUserId": "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
-    "createdAt": "2024-02-05 14:43:00",
-    "updatedAt": "2024-02-05 14:43:00"
+    "createdAt": "2024-02-05T14:43:00+09:00",
+    "updatedAt": "2024-02-05T14:43:00+09:00"
   }
 ]

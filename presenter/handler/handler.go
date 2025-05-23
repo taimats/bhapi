@@ -49,9 +49,12 @@ func (h *Handler) PostAuthRegister(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	user := convertUser(&u)
+	user, err := convertUser(&u)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "ユーザー登録に失敗")
+	}
 
-	err := h.uc.RegisterUser(ctx, user)
+	err = h.uc.RegisterUser(ctx, user)
 	if err != nil {
 		if errors.Is(err, utils.ErrAlrExists) {
 			return echo.NewHTTPError(http.StatusBadRequest, "すでにユーザーが存在します")
@@ -262,13 +265,16 @@ func (h *Handler) PutUsers(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "リクエストボディの読み込みに失敗")
 	}
 	if err := c.Validate(u); err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, "不正なリクエストです")
 	}
 
 	ctx := c.Request().Context()
-	user := convertUser(u)
+	user, err := convertUser(u)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "ユーザーの変換に失敗")
+	}
 
-	err := h.uc.UpdateUser(ctx, user)
+	err = h.uc.UpdateUser(ctx, user)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "ユーザーの更新に失敗")
 	}
