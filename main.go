@@ -59,6 +59,7 @@ func main() {
 	uc := controller.NewUser(ur)
 	rc := controller.NewRecord(sr)
 	sbc := controller.NewSearchBooks()
+	hc := controller.NewHealthDB(db)
 
 	e := echo.New()
 
@@ -89,7 +90,7 @@ func main() {
 	e.Validator = handler.NewCustomValidator(validator.New())
 
 	//echoのhanlderの設定
-	server := handler.NewHandler(uc, cc, rc, sc, sbc)
+	server := handler.NewHandler(uc, cc, rc, sc, sbc, hc)
 	handler.RegisterHandlersWithBaseURL(e, server)
 
 	//graceful shutdownの設定

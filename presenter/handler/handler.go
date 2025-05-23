@@ -16,6 +16,7 @@ type Handler struct {
 	rc  *controller.Record
 	sc  *controller.Shelf
 	sbc *controller.SearchBooks
+	hc  *controller.HealthDB
 }
 
 func NewHandler(
@@ -24,6 +25,7 @@ func NewHandler(
 	rc *controller.Record,
 	sc *controller.Shelf,
 	sbc *controller.SearchBooks,
+	hc *controller.HealthDB,
 ) *Handler {
 	return &Handler{
 		uc:  uc,
@@ -31,6 +33,7 @@ func NewHandler(
 		rc:  rc,
 		sc:  sc,
 		sbc: sbc,
+		hc:  hc,
 	}
 }
 
@@ -94,9 +97,13 @@ func (h *Handler) GetHealth(c echo.Context) error {
 // DBサーバーの監視
 // (GET /health/db)
 func (h *Handler) GetHealthDb(c echo.Context) error {
-	return c.JSON(http.StatusOK, echo.Map{
-		"message": "ok",
-	})
+	if h.hc.IsActive() {
+		return c.JSON(http.StatusOK, echo.Map{
+			"message": "ok",
+		})
+	} else {
+		return echo.NewHTTPError(http.StatusInternalServerError, "DBに異常があります")
+	}
 }
 
 // ユーザーごとに記録を返す

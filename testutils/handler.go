@@ -30,12 +30,13 @@ func SetupHandler(db *bun.DB) (*handler.Handler, *echo.Echo) {
 	uc := controller.NewUser(ur)
 	rc := controller.NewRecord(sr)
 	sbc := controller.NewSearchBooks()
+	hc := controller.NewHealthDB(db)
 
 	e := echo.New()
 	e.Validator = handler.NewCustomValidator(validator.New())
 
 	//hanlderの設定
-	h := handler.NewHandler(uc, cc, rc, sc, sbc)
+	h := handler.NewHandler(uc, cc, rc, sc, sbc, hc)
 
 	return h, e
 }
