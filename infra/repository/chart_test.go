@@ -2,6 +2,7 @@ package repository_test
 
 import (
 	"context"
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,7 +20,11 @@ func TestFindChartsByAuthUserId(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	charts := []*domain.Chart{
 		{

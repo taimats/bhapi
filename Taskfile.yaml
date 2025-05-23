@@ -75,7 +75,11 @@ tasks:
       - go clean -cache
       - go build -trimpath -ldflags "-w -s"
       - echo "success!"
- 
+  
+  lint:
+    desc: "goの静的解析の実行"
+    cmd: golangci-lint run
+  
 
 
 

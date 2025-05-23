@@ -2,6 +2,7 @@ package controller_test
 
 import (
 	"context"
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -20,7 +21,11 @@ func TestPostBookWithCharts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	sr := repository.NewShelf(bundb, cl)
 	sut := controller.NewShelf(sr)
@@ -53,7 +58,11 @@ func TestUpdateShelf(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	book := &domain.Book{
 		ID:         int64(1),
@@ -106,7 +115,11 @@ func TestGetShelf(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	book := &domain.Book{
 		ISBN10:     "4167110121",
@@ -140,7 +153,11 @@ func TestDeleteShelf(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	book := &domain.Book{
 		ISBN10:     "4167110121",

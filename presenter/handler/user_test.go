@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -22,7 +23,11 @@ func TestPostAuthRegister(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	//リクエストボディの準備
 	u := &handler.User{
@@ -55,7 +60,11 @@ func TestGetUsersWithAuthUserId(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	//テストデータの挿入
 	u := &domain.User{
@@ -96,7 +105,11 @@ func TestDeleteUsersWithAuthUserId(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	//テストデータの挿入
 	u := &domain.User{
@@ -130,7 +143,11 @@ func TestPutUsers(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	//テストデータの挿入
 	u := &domain.User{

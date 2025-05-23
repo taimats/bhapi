@@ -2,6 +2,7 @@ package repository_test
 
 import (
 	"context"
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,7 +20,11 @@ func TestCreateUser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	user := &domain.User{
 		ID:         int64(1),
@@ -47,7 +52,11 @@ func TestFindUserByAuthUserId(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	user := &domain.User{
 		ID:         int64(1),
@@ -79,7 +88,11 @@ func TestUpdateUser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	user := &domain.User{
 		ID:         int64(1),
@@ -121,7 +134,11 @@ func TestDeleteUser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	user := &domain.User{
 		ID:         int64(1),

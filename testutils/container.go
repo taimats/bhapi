@@ -114,8 +114,13 @@ func migrateUp(dsn string, migPath string) error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//マイグレーション時の接続を閉じないとスナップショットの生成に失敗する
-	defer m.Close()
+	//マイグレーション時の接続を閉じないと
+	//コンテナのスナップショットの生成に失敗する。
+	defer func() {
+		if srcErr, dbErr := m.Close(); srcErr != nil || dbErr != nil {
+			log.Printf("srcErr:%v, dbErr:%v\n", srcErr, dbErr)
+		}
+	}()
 
 	if err := m.Up(); err != nil {
 		log.Fatal(err)

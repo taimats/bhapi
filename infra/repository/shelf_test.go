@@ -2,6 +2,7 @@ package repository_test
 
 import (
 	"context"
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,7 +20,11 @@ func TestFindBooksByAuthUserID(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	authUserId := "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058"
 	books := []*domain.Book{
@@ -110,7 +115,11 @@ func TestCreateBookWithCharts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	book := &domain.Book{
 		ISBN10:     "4167110121",
@@ -164,7 +173,11 @@ func TestUpdateBookWithCharts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	book := &domain.Book{
 		ID:         int64(1),
@@ -239,7 +252,11 @@ func TestDleteBooksWithCharts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	books := []*domain.Book{
 		{

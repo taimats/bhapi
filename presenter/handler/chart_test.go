@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -20,7 +21,11 @@ func TestGetChartsWithAuthUserId(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	charts := []*domain.Chart{
 		{

@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -20,7 +21,11 @@ func TestGetHealth(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	sut, e := testutils.SetupHandler(bundb)
 	r := httptest.NewRequest(http.MethodGet, "/health", nil)
@@ -47,7 +52,11 @@ func TestGetHealthDb(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	sut, e := testutils.SetupHandler(bundb)
 	r := httptest.NewRequest(http.MethodGet, "/health/db", nil)

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -50,7 +51,11 @@ func SearchForGoogleBooks(query string, apiBaseURL string) ([]*BookResult, error
 	if err != nil {
 		return nil, fmt.Errorf("リクエストに失敗:%w", err)
 	}
-	defer res.Body.Close()
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	//res.bodyから必要な箇所のみ抽出
 	jb, err := io.ReadAll(res.Body)

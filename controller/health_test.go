@@ -2,6 +2,7 @@ package controller_test
 
 import (
 	"context"
+	"log"
 	"testing"
 
 	"github.com/taimats/bhapi/controller"
@@ -15,7 +16,11 @@ func TestHealthDB(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 	sut := controller.NewHealthDB(bundb)
 
 	ok := sut.IsActive()

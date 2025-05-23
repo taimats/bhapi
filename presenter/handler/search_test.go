@@ -1,6 +1,7 @@
 package handler_test
 
 import (
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -18,7 +19,11 @@ func TestGetSearch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	//外部APIテストサーバーの準備
 	ts := testutils.PseudoGoogleBooksAPIServer(t)

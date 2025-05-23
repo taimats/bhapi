@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -23,7 +24,11 @@ func TestPostShelfAuthUserId(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	//リクエストボディの準備
 	book := &handler.Book{
@@ -62,7 +67,11 @@ func TestGetShelfWithAuthUserId(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	//テストデータの挿入
 	book := &domain.Book{
@@ -108,7 +117,11 @@ func TestPutShelfWithAuthUserId(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	//テストデータの挿入
 	book := &domain.Book{
@@ -201,7 +214,11 @@ func TestDeleteShelfWithAuthUserId(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	//テストデータの挿入
 	book := &domain.Book{

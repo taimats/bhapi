@@ -2,6 +2,7 @@ package controller_test
 
 import (
 	"context"
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -20,7 +21,11 @@ func TestRegisterUser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	user := &domain.User{
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
@@ -48,7 +53,11 @@ func TestGetUser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	user := &domain.User{
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
@@ -81,7 +90,11 @@ func TestUpdateUser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	user := &domain.User{
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
@@ -119,7 +132,11 @@ func TestDeleteUser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	user := &domain.User{
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",

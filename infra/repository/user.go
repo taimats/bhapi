@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/taimats/bhapi/domain"
 	"github.com/taimats/bhapi/utils"
@@ -43,7 +44,11 @@ func (ur *User) CreateUser(ctx context.Context, user *domain.User) (userId int64
 	if err != nil {
 		return 0, fmt.Errorf("トランザクションの生成に失敗:%w", err)
 	}
-	defer tx.Rollback()
+	defer func() {
+		if err := tx.Rollback(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	err = tx.NewInsert().Model(user).Returning("id").Scan(ctx, &userId)
 	if err != nil {
@@ -65,7 +70,11 @@ func (ur *User) UpdateUser(ctx context.Context, user *domain.User) error {
 	if err != nil {
 		return fmt.Errorf("トランザクションの生成に失敗:%w", err)
 	}
-	defer tx.Rollback()
+	defer func() {
+		if err := tx.Rollback(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	_, err = tx.NewUpdate().Model(user).WherePK().Exec(ctx)
 	if err != nil {
@@ -85,7 +94,11 @@ func (ur *User) DleteUser(ctx context.Context, user *domain.User) error {
 	if err != nil {
 		return fmt.Errorf("トランザクションの生成に失敗:%w", err)
 	}
-	defer tx.Rollback()
+	defer func() {
+		if err := tx.Rollback(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	_, err = tx.NewDelete().Model(user).WherePK().Exec(ctx)
 	if err != nil {

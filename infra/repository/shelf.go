@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/taimats/bhapi/domain"
 	"github.com/taimats/bhapi/utils"
@@ -48,7 +49,11 @@ func (sr *Shelf) CreateBookWithCharts(ctx context.Context, book *domain.Book, ch
 	if err != nil {
 		return fmt.Errorf("トランザクションの生成に失敗:%w", err)
 	}
-	defer tx.Rollback()
+	defer func() {
+		if err := tx.Rollback(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	//本の登録
 	var bookId int64
@@ -85,7 +90,11 @@ func (sr *Shelf) UpdateBookWithCharts(ctx context.Context, book *domain.Book) er
 	if err != nil {
 		return fmt.Errorf("トランザクションの生成に失敗:%w", err)
 	}
-	defer tx.Rollback()
+	defer func() {
+		if err := tx.Rollback(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	//本の更新
 	_, err = tx.NewUpdate().Model(book).WherePK().Exec(ctx)
@@ -140,7 +149,11 @@ func (sr *Shelf) DleteBooksWithCharts(ctx context.Context, books []*domain.Book)
 	if err != nil {
 		return fmt.Errorf("トランザクションの生成に失敗:%w", err)
 	}
-	defer tx.Rollback()
+	defer func() {
+		if err := tx.Rollback(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	//本の削除
 	err = tx.NewDelete().Model(&books).WherePK().Scan(ctx)

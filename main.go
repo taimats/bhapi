@@ -45,7 +45,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("データベースの接続に失敗:%s", err)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	//repositoryインスタンスの生成
 	cl := utils.NewClocker()

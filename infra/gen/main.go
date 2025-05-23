@@ -21,7 +21,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer bundb.Close()
+	defer func() {
+		if err := bundb.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	models := []interface{}{
 		(*domain.User)(nil),
