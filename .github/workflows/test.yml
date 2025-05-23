@@ -1,11 +1,6 @@
 name: Test
 
 on:
-  pull_request:
-    branches: 
-      - main
-    paths: 
-      - "**/*.go"
   workflow_dispatch:
 
 permissions: {}
