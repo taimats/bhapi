@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -56,15 +57,14 @@ func SearchForGoogleBooks(query string, apiBaseURL string) ([]*BookResult, error
 			log.Println(err)
 		}
 	}()
-
-	//res.bodyから必要な箇所のみ抽出
-	jb, err := io.ReadAll(res.Body)
+	var buf bytes.Buffer
+	_, err = io.Copy(&buf, res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("res.bodyの読み出しに失敗:%w", err)
 	}
 
 	//jsonから必要なものを抽出し、BookResult型の配列を作成
-	books, err := ExtractBooksFromJSON(string(jb))
+	books, err := ExtractBooksFromJSON(buf.String())
 	if err != nil {
 		return nil, fmt.Errorf("res.bodyの読み出しに失敗:%v", err)
 	}
@@ -79,23 +79,23 @@ func ExtractBooksFromJSON(json string) ([]*BookResult, error) {
 		return nil, errors.New("invalid JSON")
 	}
 	//jsonの各項目に直接アクセスするためgjsonを利用
-	js := gjson.Get(string(json), "items")
+	gj := gjson.Get(json, "items")
+	//3桁カンマ区切りで出力するためのfmt拡張
+	fmtx := message.NewPrinter(language.Japanese)
 
-	books := make([]*BookResult, len(js.Array()))
-	for i, j := range js.Array() {
-		title := gjson.Get(j.String(), "volumeInfo.title").String()
-		a := gjson.Get(j.String(), "volumeInfo.authors")
+	books := []*BookResult{}
+	for _, r := range gj.Array() {
+		j := r.String()
+		title := gjson.Get(j, "volumeInfo.title").String()
+		a := gjson.Get(j, "volumeInfo.authors")
 		var authors []string
 		for _, author := range a.Array() {
 			authors = append(authors, author.String())
 		}
-		isbn10 := gjson.Get(j.String(), `volumeInfo.industryIdentifiers.#(type="ISBN_10").identifier`).String()
-		page := gjson.Get(j.String(), "volumeInfo.pageCount").Int()
-		imageURL := gjson.Get(j.String(), "volumeInfo.imageLinks.thumbnail").String()
-		price := gjson.Get(j.String(), "saleInfo.listPrice.amount").Int()
-
-		//3桁カンマ区切りで出力するためのfmt拡張
-		fmtx := message.NewPrinter(language.Japanese)
+		isbn10 := gjson.Get(j, `volumeInfo.industryIdentifiers.#(type="ISBN_10").identifier`).String()
+		page := gjson.Get(j, "volumeInfo.pageCount").Int()
+		imageURL := gjson.Get(j, "volumeInfo.imageLinks.thumbnail").String()
+		price := gjson.Get(j, "saleInfo.listPrice.amount").Int()
 
 		b := &BookResult{
 			ISBN10:   isbn10,
@@ -105,8 +105,7 @@ func ExtractBooksFromJSON(json string) ([]*BookResult, error) {
 			Page:     fmtx.Sprint(page),          //数値をカンマ(,)区切りにする処理
 			Price:    fmtx.Sprint(price),         //数値をカンマ(,)区切りにする処理
 		}
-		books[i] = b
+		books = append(books, b)
 	}
-
 	return books, nil
 }

@@ -99,6 +99,46 @@ func TestExtractBooksFromJSON(t *testing.T) {
 
 	//Assert
 	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("a mismatch between (-want +got):%s", diff)
+		t.Errorf("異なる構造体(-want +got):%s", diff)
+	}
+}
+
+func BenchmarkSearchForGoogleBooks(b *testing.B) {
+	err := testutils.DotEnv()
+	if err != nil {
+		b.Fatal(err)
+	}
+	ts := testutils.PseudoAPIServer(b)
+	defer ts.Close()
+
+	u, err := url.Parse(ts.URL)
+	if err != nil {
+		b.Fatalf("GoogleBooksAPIテストサーバーでurlパースに失敗:%v", err)
+	}
+	testURL := u.JoinPath("books", "v1", "volumes").String()
+	q := "容疑者の献身"
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err = domain.SearchForGoogleBooks(q, testURL)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkExtractBooksFromJSON(b *testing.B) {
+	searchResult, err := testutils.TestFile("response_body.json")
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := domain.ExtractBooksFromJSON(string(searchResult))
+		if err != nil {
+			b.Fatal(err)
+		}
 	}
 }

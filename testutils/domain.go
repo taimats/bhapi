@@ -27,3 +27,22 @@ func PseudoGoogleBooksAPIServer(t *testing.T) *httptest.Server {
 
 	return httptest.NewServer(mux)
 }
+
+func PseudoAPIServer(b *testing.B) *httptest.Server {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /books/v1/volumes", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		testData, err := TestFile("response_body.json")
+		if err != nil {
+			b.Fatal(err)
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		defer func() {
+			if _, err := w.Write(testData); err != nil {
+				b.Fatal(err)
+			}
+		}()
+	}))
+
+	return httptest.NewServer(mux)
+}
