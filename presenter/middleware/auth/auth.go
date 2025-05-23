@@ -3,7 +3,6 @@ package auth
 import (
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"os"
 
 	"github.com/taimats/bhapi/utils"
@@ -34,21 +33,4 @@ func Authenticate(apikey string) (bool, error) {
 	}
 
 	return true, nil
-}
-
-// TOKEN_SEEDを変更したときに使用（サーバーの検証には使わない）
-func GenerateSource() (string, error) {
-	ts := os.Getenv("TOKEN_SEED")
-
-	hashed, err := bcrypt.GenerateFromPassword([]byte(ts), bcrypt.DefaultCost)
-	if err != nil {
-		return "", fmt.Errorf("ハッシュの生成に失敗:%w", err)
-	}
-
-	return string(hashed), nil
-}
-
-func IssueAPIKey(src string) string {
-	apikey := base64.URLEncoding.EncodeToString([]byte(src))
-	return apikey
 }
