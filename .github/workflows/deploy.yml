@@ -28,7 +28,7 @@ jobs:
             key: $SSH_PRIVATE_KEY_02
           - host: $SERVER_HOST_02
             key: $SSH_PRIVATE_KEY_01
-    timeout-minutes: 20
+    timeout-minutes: 5
     runs-on: ubuntu-latest
 
     steps:

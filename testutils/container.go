@@ -112,7 +112,7 @@ func newDBContainer(ctx context.Context) (pctr *postgres.PostgresContainer, term
 func migrateUp(dsn string, migPath string) error {
 	m, err := migrate.New("file://"+migPath, dsn)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	//マイグレーション時の接続を閉じないと
 	//コンテナのスナップショットの生成に失敗する。
@@ -123,7 +123,7 @@ func migrateUp(dsn string, migPath string) error {
 	}()
 
 	if err := m.Up(); err != nil {
-		log.Fatal(err)
+		return err
 	}
 	return nil
 }
