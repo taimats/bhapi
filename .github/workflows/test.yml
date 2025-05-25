@@ -41,7 +41,7 @@ jobs:
             - uses: actions/checkout@v4
 
             - name: 環境変数の設定
-              run: echo ${{ secrets.DOTENV }} > ${{ github.workspace }}/.env
+              run: echo "${{ secrets.DOTENV }}" > ${{ github.workspace }}/.env
               
             - uses: actions/setup-go@v5
               with:
