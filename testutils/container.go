@@ -2,7 +2,6 @@ package testutils
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -86,9 +85,6 @@ func newDBContainer(ctx context.Context) (pctr *postgres.PostgresContainer, term
 	dbName := os.Getenv("POSTGRES_DB")
 	dbUser := os.Getenv("POSTGRES_USER")
 	dbPassword := os.Getenv("POSTGRES_PASSWORD")
-	if dbName == "" || dbUser == "" || dbPassword == "" {
-		return nil, nil, errors.New("変数が空です")
-	}
 
 	//DBコンテナの取得
 	pctr, err = postgres.Run(ctx, "postgres:16-alpine",
