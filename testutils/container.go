@@ -12,7 +12,6 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
-	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/uptrace/bun"
 )
 
@@ -91,10 +90,11 @@ func newDBContainer(ctx context.Context) (pctr *postgres.PostgresContainer, term
 		postgres.WithDatabase(dbName),
 		postgres.WithUsername(dbUser),
 		postgres.WithPassword(dbPassword),
-		testcontainers.WithWaitStrategy(
-			wait.ForLog("database system is ready to accept connections").WithOccurrence(2),
-			wait.ForListeningPort("5432/tcp"),
-		),
+		postgres.BasicWaitStrategies(),
+		// testcontainers.WithWaitStrategy(
+		// 	wait.ForLog("database system is ready to accept connections").WithOccurrence(2),
+		// 	wait.ForListeningPort("5432/tcp"),
+		// ),
 	)
 	if err != nil {
 		return nil, nil, fmt.Errorf("DBコンテナの生成に失敗:%w", err)
