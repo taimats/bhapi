@@ -2,6 +2,7 @@ package testutils
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -12,6 +13,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
+	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/uptrace/bun"
 )
 
@@ -84,17 +86,19 @@ func newDBContainer(ctx context.Context) (pctr *postgres.PostgresContainer, term
 	dbName := os.Getenv("POSTGRES_DB")
 	dbUser := os.Getenv("POSTGRES_USER")
 	dbPassword := os.Getenv("POSTGRES_PASSWORD")
+	if dbName == "" || dbUser == "" || dbPassword == "" {
+		return nil, nil, errors.New("変数が空です")
+	}
 
 	//DBコンテナの取得
 	pctr, err = postgres.Run(ctx, "postgres:16-alpine",
 		postgres.WithDatabase(dbName),
 		postgres.WithUsername(dbUser),
 		postgres.WithPassword(dbPassword),
-		postgres.BasicWaitStrategies(),
-		// testcontainers.WithWaitStrategy(
-		// 	wait.ForLog("database system is ready to accept connections").WithOccurrence(2),
-		// 	wait.ForListeningPort("5432/tcp"),
-		// ),
+		testcontainers.WithWaitStrategy(
+			wait.ForLog("database system is ready to accept connections").WithOccurrence(2),
+			wait.ForListeningPort("5432/tcp"),
+		),
 	)
 	if err != nil {
 		return nil, nil, fmt.Errorf("DBコンテナの生成に失敗:%w", err)
