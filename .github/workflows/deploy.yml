@@ -28,11 +28,60 @@ jobs:
             key: $SSH_PRIVATE_KEY_02
           - host: $SERVER_HOST_02
             key: $SSH_PRIVATE_KEY_01
+    environment: prod
     timeout-minutes: 5
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4
+
+      - name: 環境変数の設定
+        run: echo "${{ secrets.DOTENV }}" > ${{ github.workspace }}/.env
+      
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.1"
+          cache: true
+          cache-dependency-path: |
+            **/go.sum
+            **/go.mod
+      - name: Resolve dependencies
+        run: go mod download
+      - name: Build
+        run: go clean -cache && go build -trimpath -ldflags "-w -s"
+  
+      - name: Upload bin file
+        uses: actions/upload-artifact@v4
+        with:
+          name: gobinfile
+          path: dist/
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Download bin file
+        uses: actions/download-artifact@v4
+        with:
+          name: gobinfile
+          path: dist/
+  
       - name: Deploy
+        uses: appleboy/scp-action@ff85246acaad7bdce478db94a363cd2bf7c90345 # v1.0.0
+        with:
+          proxy_host: ${{ secrets.PROXY_HOST }}
+          proxy_username: ${{ secrets.PROXY_USERNAME }}
+          proxy_key: ${{ secrets.PROXY_KEY }}
+          proxy_port: ${{ secrets.PROXY_PORT }}
+          proxy_passphrase: ${{ secrets.PROXY_PASSPHRASE }}
+
+          host: ${{ matrix.host }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ matrix.key }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          source: dist/*
+          target: ${{ secrets.SERVER_DEPLOY_DIR }}
+      
+      - name: Start the server
         uses: appleboy/ssh-action@2ead5e36573f08b82fbfce1504f1a4b05a647c6f # v1.2.2
         with:
           proxy_host: ${{ secrets.PROXY_HOST }}
@@ -47,9 +96,5 @@ jobs:
           key: ${{ matrix.key }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
-            cd ${{ secrets.SERVER_DEPLOY_DIR }}
-            git pull origin main
-            go mod tidy
-            go clean -cache && go build -o ${{ secrets.SERVER_EXECUTE_PATH }} -trimpath -ldflags "-w -s"
-            chmod +x ${{ secrets.SERVER_EXECUTE_PATH }}
+            sudo chmod +x ${{ secrets.SERVER_EXECUTE_PATH }}
             nohup ${{ secrets.SERVER_EXECUTE_PATH }} & > "${HOME}/app_$(date '+%Y_%m_%d_%H:%M:%S').log"
