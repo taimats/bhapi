@@ -15,6 +15,7 @@ jobs:
       contents: read
       actions: read
     timeout-minutes: 5
+    environment: prod
     runs-on: ubuntu-latest
     steps:
         - uses: actions/checkout@v4
