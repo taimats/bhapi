@@ -21,7 +21,7 @@ jobs:
         - uses: actions/checkout@v4
 
         - name: Scp migration files
-          uses: appleboy/scp-action@v1
+          uses: appleboy/scp-action@ff85246acaad7bdce478db94a363cd2bf7c90345 # v1.0.0
           with:
             proxy_host: ${{ secrets.PROXY_HOST }}
             proxy_username: ${{ secrets.PROXY_USERNAME }}
@@ -36,7 +36,7 @@ jobs:
             target: ${{ secrets.SERVER_MIGRATION_PATH }}
         
         - name: Migrate Up
-          uses: appleboy/ssh-action@v1
+          uses: appleboy/ssh-action@2ead5e36573f08b82fbfce1504f1a4b05a647c6f # v1.2.2
           with:
             proxy_host: ${{ secrets.PROXY_HOST }}
             proxy_username: ${{ secrets.PROXY_USERNAME }}
