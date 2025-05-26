@@ -29,7 +29,7 @@ jobs:
           - host: $SERVER_HOST_02
             key: $SSH_PRIVATE_KEY_01
     environment: prod
-    timeout-minutes: 5
+    timeout-minutes: 10
     runs-on: ubuntu-latest
 
     steps:
@@ -48,21 +48,21 @@ jobs:
       - name: Resolve dependencies
         run: go mod download
       - name: Build
-        run: go clean -cache && go build -trimpath -ldflags "-w -s"
+        run: go clean -cache && go build -o bin/ -trimpath -ldflags "-w -s"
   
-      - name: Upload bin file
-        uses: actions/upload-artifact@v4
-        with:
-          name: gobinfile
-          path: dist/
-          if-no-files-found: error
-          retention-days: 1
+      # - name: Upload bin file
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: gobinfile
+      #     path: bin/
+      #     if-no-files-found: error
+      #     retention-days: 1
 
-      - name: Download bin file
-        uses: actions/download-artifact@v4
-        with:
-          name: gobinfile
-          path: dist/
+      # - name: Download bin file
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: gobinfile
+      #     path: bin/
   
       - name: Deploy
         uses: appleboy/scp-action@ff85246acaad7bdce478db94a363cd2bf7c90345 # v1.0.0
@@ -78,7 +78,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           key: ${{ matrix.key }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          source: dist/*
+          source: bin/*
           target: ${{ secrets.SERVER_DEPLOY_DIR }}
       
       - name: Start the server
@@ -88,13 +88,11 @@ jobs:
           proxy_username: ${{ secrets.PROXY_USERNAME }}
           proxy_key: ${{ secrets.PROXY_KEY }}
           proxy_port: ${{ secrets.PROXY_PORT }}
-          proxy_passphrase: ${{ secrets.PROXY_PASSPHRASE }}
 
           host: ${{ matrix.host }}
           username: ${{ secrets.SERVER_USERNAME }}
           port: ${{ secrets.SSH_PORT }}
           key: ${{ matrix.key }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             sudo chmod +x ${{ secrets.SERVER_EXECUTE_PATH }}
             nohup ${{ secrets.SERVER_EXECUTE_PATH }} & > "${HOME}/app_$(date '+%Y_%m_%d_%H:%M:%S').log"
