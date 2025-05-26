@@ -1,0 +1,53 @@
+name: Migration Up
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  upmig:
+    permissions:
+      contents: read
+      actions: read
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v4
+
+        - name: Scp migration files
+          uses: appleboy/scp-action@ff85246acaad7bdce478db94a363cd2bf7c90345 # v1.0.0
+          with:
+            proxy_host: ${{ secrets.PROXY_HOST }}
+            proxy_username: ${{ secrets.PROXY_USERNAME }}
+            proxy_key: ${{ secrets.PROXY_KEY }}
+            proxy_port: ${{ secrets.PROXY_PORT }}
+            proxy_passphrase: ${{ secrets.PROXY_PASSPHRASE }}
+            
+            host: ${{ secrets.SERVER_HOST_01 }}
+            username: ${{ secrets.SERVER_USERNAME }}
+            key: ${{ secrets.SSH_PRIVATE_KEY_01 }}
+            port: ${{ secrets.SSH_PORT }}
+            source: "${{ github.workspace }}/infra/migrations/*"
+            target: ${{ secrets.SERVER_MIGRATION_PATH }}
+        
+        - name: Migrate Up
+          uses: appleboy/ssh-action@2ead5e36573f08b82fbfce1504f1a4b05a647c6f # v1.2.2
+          with:
+            proxy_host: ${{ secrets.PROXY_HOST }}
+            proxy_username: ${{ secrets.PROXY_USERNAME }}
+            proxy_key: ${{ secrets.PROXY_KEY }}
+            proxy_port: ${{ secrets.PROXY_PORT }}
+            proxy_passphrase: ${{ secrets.PROXY_PASSPHRASE }}
+
+            host: ${{ secrets.SERVER_HOST_01 }}
+            username: ${{ secrets.SERVER_USERNAME }}
+            port: ${{ secrets.SSH_PORT }}
+            key: ${{ secrets.SSH_PRIVATE_KEY_01 }}
+            passphrase: ${{ secrets.SSH_PASSPHRASE }}
+            script: |
+              migrate -path ${{ secrets.SERVER_MIGRATION_PATH }} -database "$${{ secrets.PSQL_DSN }}" -verbose up
