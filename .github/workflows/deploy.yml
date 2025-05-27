@@ -62,10 +62,9 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ${{ secrets.SERVER_DEPLOY_DIR }}
+            cd ${{ secrets.SERVER_EXECUTE_DIR }}
             sudo chmod +x ${{ secrets.SERVER_EXECUTE_PATH }}
             nohup ${{ secrets.SERVER_EXECUTE_PATH }} & > "${HOME}/app_$(date '+%Y_%m_%d_%H:%M:%S').log"
-            screen
-            cd ${{ secrets.SERVER_DEPLOY_DIR }} && rm .env
+            rm .env
 
             
