@@ -65,4 +65,3 @@ jobs:
             cd ${{ secrets.SERVER_EXECUTE_DIR }}
             sudo chmod +x ${{ secrets.SERVER_EXECUTE_PATH }}
             nohup ${{ secrets.SERVER_EXECUTE_PATH }} & > "${HOME}/app_$(date '+%Y_%m_%d_%H:%M:%S').log"
-            rm .env
