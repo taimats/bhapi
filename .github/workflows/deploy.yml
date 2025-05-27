@@ -61,7 +61,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST_01 }}, ${{ secrets.SERVER_HOST_02 }}
           username: ${{ secrets.SERVER_USERNAME }}
           port: ${{ secrets.SSH_PORT }}
-          key: ${{ secrets.SSH_PRIVATE_KEY_01 }}, ${{ secrets.SSH_PRIVATE_KEY_02 }}
+          key: ${{ secrets.SSH_PRIVATE_KEY_01 }}
           source: bin/*
           target: ${{ secrets.SERVER_DEPLOY_DIR }}
       
