@@ -15,7 +15,7 @@ jobs:
       contents: read
       actions: read
     environment: prod
-    timeout-minutes: 10
+    timeout-minutes: 5
     runs-on: ubuntu-latest
 
     steps:
@@ -64,3 +64,4 @@ jobs:
           script: |
             sudo chmod +x ${{ secrets.SERVER_EXECUTE_PATH }}
             nohup ${{ secrets.SERVER_EXECUTE_PATH }} & > "${HOME}/app_$(date '+%Y_%m_%d_%H:%M:%S').log"
+            rm .env
