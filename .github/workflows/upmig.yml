@@ -30,7 +30,7 @@ jobs:
             
             host: ${{ secrets.SERVER_HOST_01 }}
             username: ${{ secrets.SERVER_USERNAME }}
-            key: ${{ secrets.SSH_PRIVATE_KEY_01 }}
+            key: ${{ secrets.SSH_PRIVATE_KEY }}
             port: ${{ secrets.SSH_PORT }}
             source: "infra/migrations"
             target: ${{ secrets.SERVER_MIGRATION_DIR }}
@@ -46,6 +46,6 @@ jobs:
             host: ${{ secrets.SERVER_HOST_01 }}
             username: ${{ secrets.SERVER_USERNAME }}
             port: ${{ secrets.SSH_PORT }}
-            key: ${{ secrets.SSH_PRIVATE_KEY_01 }}
+            key: ${{ secrets.SSH_PRIVATE_KEY }}
             script: |
               migrate -path ${{ secrets.SERVER_MIGRATION_PATH }} -database ${{ secrets.PSQL_DSN }} -verbose up
