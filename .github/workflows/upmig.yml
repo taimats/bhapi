@@ -48,4 +48,4 @@ jobs:
             port: ${{ secrets.SSH_PORT }}
             key: ${{ secrets.SSH_PRIVATE_KEY_01 }}
             script: |
-              migrate -path ${{ secrets.SERVER_MIGRATION_PATH }} -database "$${{ secrets.PSQL_DSN }}" -verbose up
+              migrate -path ${{ secrets.SERVER_MIGRATION_PATH }} -database ${{ secrets.PSQL_DSN }} -verbose up
