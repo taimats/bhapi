@@ -10,7 +10,7 @@ defaults:
     shell: bash
 
 jobs:
-  build:
+  Deploy:
     permissions:
       contents: read
       actions: read
@@ -35,21 +35,7 @@ jobs:
         run: go mod download
       - name: Build
         run: go clean -cache && go build -o bin/ -trimpath -ldflags "-w -s"
-  
-      # - name: Upload bin file
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: gobinfile
-      #     path: bin/
-      #     if-no-files-found: error
-      #     retention-days: 1
-
-      # - name: Download bin file
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: gobinfile
-      #     path: bin/
-  
+      
       - name: Deploy
         uses: appleboy/scp-action@ff85246acaad7bdce478db94a363cd2bf7c90345 # v1.0.0
         with:
@@ -61,7 +47,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST_01 }}, ${{ secrets.SERVER_HOST_02 }}
           username: ${{ secrets.SERVER_USERNAME }}
           port: ${{ secrets.SSH_PORT }}
-          key: ${{ secrets.SSH_PRIVATE_KEY_01 }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: bin/*
           target: ${{ secrets.SERVER_DEPLOY_DIR }}
       
@@ -76,7 +62,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST_01 }}, ${{ secrets.SERVER_HOST_02 }}
           username: ${{ secrets.SERVER_USERNAME }}
           port: ${{ secrets.SSH_PORT }}
-          key: ${{ secrets.SSH_PRIVATE_KEY_01 }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             sudo chmod +x ${{ secrets.SERVER_EXECUTE_PATH }}
             nohup ${{ secrets.SERVER_EXECUTE_PATH }} & > "${HOME}/app_$(date '+%Y_%m_%d_%H:%M:%S').log"
