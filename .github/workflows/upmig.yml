@@ -32,7 +32,7 @@ jobs:
             username: ${{ secrets.SERVER_USERNAME }}
             key: ${{ secrets.SSH_PRIVATE_KEY_01 }}
             port: ${{ secrets.SSH_PORT }}
-            source: "${{ github.workspace }}/infra/migrations/*"
+            source: "infra/migrations/*"
             target: ${{ secrets.SERVER_MIGRATION_PATH }}
         
         - name: Migrate Up
