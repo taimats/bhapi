@@ -14,20 +14,6 @@ jobs:
     permissions:
       contents: read
       actions: read
-    env:
-      SERVER_HOST_01: ${{ secrets.SERVER_HOST_01 }}
-      SERVER_HOST_02: ${{ secrets.SERVER_HOST_02 }}
-      SSH_PRIVATE_KEY_01: ${{ secrets.SSH_PRIVATE_KEY_01}}
-      SSH_PRIVATE_KEY_02: ${{ secrets.SSH_PRIVATE_KEY_02}}
-    strategy:
-      matrix:
-        host: [$SERVER_HOST_01, $SERVER_HOST_02]
-        key: [$SSH_PRIVATE_KEY_01, $SSH_PRIVATE_KEY_02]
-        exclude:
-          - host: $SERVER_HOST_01
-            key: $SSH_PRIVATE_KEY_02
-          - host: $SERVER_HOST_02
-            key: $SSH_PRIVATE_KEY_01
     environment: prod
     timeout-minutes: 10
     runs-on: ubuntu-latest
@@ -72,10 +58,10 @@ jobs:
           proxy_key: ${{ secrets.PROXY_KEY }}
           proxy_port: ${{ secrets.PROXY_PORT }}
 
-          host: ${{ matrix.host }}
+          host: ${{ secrets.SERVER_HOST_01 }}, ${{ secrets.SERVER_HOST_02 }}
           username: ${{ secrets.SERVER_USERNAME }}
           port: ${{ secrets.SSH_PORT }}
-          key: ${{ matrix.key }}
+          key: ${{ secrets.SSH_PRIVATE_KEY_01 }}, ${{ secrets.SSH_PRIVATE_KEY_02 }}
           source: bin/*
           target: ${{ secrets.SERVER_DEPLOY_DIR }}
       
@@ -87,10 +73,10 @@ jobs:
           proxy_key: ${{ secrets.PROXY_KEY }}
           proxy_port: ${{ secrets.PROXY_PORT }}
 
-          host: ${{ matrix.host }}
+          host: ${{ secrets.SERVER_HOST_01 }}, ${{ secrets.SERVER_HOST_02 }}
           username: ${{ secrets.SERVER_USERNAME }}
           port: ${{ secrets.SSH_PORT }}
-          key: ${{ matrix.key }}
+          key: ${{ secrets.SSH_PRIVATE_KEY_01 }}, ${{ secrets.SSH_PRIVATE_KEY_02 }}
           script: |
             sudo chmod +x ${{ secrets.SERVER_EXECUTE_PATH }}
             nohup ${{ secrets.SERVER_EXECUTE_PATH }} & > "${HOME}/app_$(date '+%Y_%m_%d_%H:%M:%S').log"
