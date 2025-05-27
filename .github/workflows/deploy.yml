@@ -32,7 +32,7 @@ jobs:
       - name: Build
         run: go clean -cache && go build -o bin/ -trimpath -ldflags "-w -s"
       - name: Set up env
-        run: echo "${{ secrets.DOTENV }}" > bin/.env
+        run: echo "${{ secrets.DOTENV }}" > .env
 
       - name: Deploy
         uses: appleboy/scp-action@ff85246acaad7bdce478db94a363cd2bf7c90345 # v1.0.0
@@ -46,7 +46,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           port: ${{ secrets.SSH_PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: bin/*
+          source: "bin/*, .env"
           target: ${{ secrets.SERVER_DEPLOY_DIR }}
       
       - name: Start the servers
@@ -62,6 +62,5 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ${{ secrets.SERVER_EXECUTE_DIR }}
             sudo chmod +x ${{ secrets.SERVER_EXECUTE_PATH }}
             nohup ${{ secrets.SERVER_EXECUTE_PATH }} & > "${HOME}/app_$(date '+%Y_%m_%d_%H:%M:%S').log"
