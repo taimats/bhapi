@@ -19,11 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: 環境変数の設定
-        run: echo "${{ secrets.DOTENV }}" > ${{ github.workspace }}/.env
-      
+      - uses: actions/checkout@v4    
       - uses: actions/setup-go@v5
         with:
           go-version: "1.23.1"
@@ -35,7 +31,9 @@ jobs:
         run: go mod download
       - name: Build
         run: go clean -cache && go build -o bin/ -trimpath -ldflags "-w -s"
-      
+      - name: Set up env
+        run: echo "${{ secrets.DOTENV }}" > bin/.env
+
       - name: Deploy
         uses: appleboy/scp-action@ff85246acaad7bdce478db94a363cd2bf7c90345 # v1.0.0
         with:
@@ -66,3 +64,4 @@ jobs:
           script: |
             sudo chmod +x ${{ secrets.SERVER_EXECUTE_PATH }}
             nohup ${{ secrets.SERVER_EXECUTE_PATH }} & > "${HOME}/app_$(date '+%Y_%m_%d_%H:%M:%S').log"
+            rm .env
