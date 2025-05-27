@@ -65,7 +65,7 @@ jobs:
           source: bin/*
           target: ${{ secrets.SERVER_DEPLOY_DIR }}
       
-      - name: Start the server
+      - name: Start the servers
         uses: appleboy/ssh-action@2ead5e36573f08b82fbfce1504f1a4b05a647c6f # v1.2.2
         with:
           proxy_host: ${{ secrets.PROXY_HOST }}
@@ -76,7 +76,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST_01 }}, ${{ secrets.SERVER_HOST_02 }}
           username: ${{ secrets.SERVER_USERNAME }}
           port: ${{ secrets.SSH_PORT }}
-          key: ${{ secrets.SSH_PRIVATE_KEY_01 }}, ${{ secrets.SSH_PRIVATE_KEY_02 }}
+          key: ${{ secrets.SSH_PRIVATE_KEY_01 }}
           script: |
             sudo chmod +x ${{ secrets.SERVER_EXECUTE_PATH }}
             nohup ${{ secrets.SERVER_EXECUTE_PATH }} & > "${HOME}/app_$(date '+%Y_%m_%d_%H:%M:%S').log"
