@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func NewRequestLoggerConfig(logger *slog.Logger) middleware.RequestLoggerConfig {
@@ -41,4 +42,19 @@ func NewRequestLoggerConfig(logger *slog.Logger) middleware.RequestLoggerConfig 
 			return nil
 		},
 	}
+}
+
+// 以下の特徴を持つloggerを返す。
+//  1. 出力先がファイル（ファイル名はfilePath）
+//  2. ローテーションあり（100MBのログファイルごと）
+//  3. 保存期間、保存ログ数は無制限
+//
+// 呼び出しもとでは使用後にwをClose()する必要がある。
+func NewLogger(filePath string) (l *slog.Logger, w *lumberjack.Logger) {
+	w = &lumberjack.Logger{
+		Filename:  filePath,
+		LocalTime: true,
+	}
+	l = slog.New(slog.NewJSONHandler(w, nil))
+	return
 }

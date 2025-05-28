@@ -21,6 +21,7 @@ require (
 	github.com/uptrace/bun/extra/bundebug v1.2.11
 	golang.org/x/crypto v0.38.0
 	golang.org/x/text v0.25.0
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
 require (

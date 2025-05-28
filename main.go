@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -68,10 +67,19 @@ func main() {
 	e := echo.New()
 
 	//echoのmiddlewareの設定
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	home, err := os.UserHomeDir()
+	if err != nil {
+		log.Println(err)
+	}
+	l, w := loggers.NewLogger(fmt.Sprintf("%s/bhapi/logs/app.log", home))
+	defer func() {
+		if err := w.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 	e.Use(middleware.Recover())
 	e.Use(middleware.RequestLoggerWithConfig(
-		loggers.NewRequestLoggerConfig(logger),
+		loggers.NewRequestLoggerConfig(l),
 	))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: allowedOrigins,
