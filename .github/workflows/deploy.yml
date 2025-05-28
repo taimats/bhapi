@@ -46,6 +46,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           port: ${{ secrets.SSH_PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          rm: true
           source: bin/*
           target: ${{ secrets.SERVER_DEPLOY_DIR }}
       
