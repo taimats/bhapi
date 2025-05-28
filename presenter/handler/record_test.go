@@ -99,8 +99,10 @@ func TestGetRecordsWithAuthUserId(t *testing.T) {
 	testutils.InsertTestData(ctx, t, bundb, books...)
 
 	sut, e := testutils.SetupHandler(bundb)
-	r := httptest.NewRequest(http.MethodGet, "/records/c0cc3f0c-9a02-45ba-9de7-7d7276bb6058", nil)
+	r := httptest.NewRequest(http.MethodGet, "/records/:authUserId", nil)
 	c, w := testutils.EchoContextWithRecorder(r, e)
+	c.SetParamNames("authUserId")
+	c.SetParamValues("c0cc3f0c-9a02-45ba-9de7-7d7276bb6058")
 
 	a := assert.New(t)
 	g := goldie.New(t, goldie.WithDiffEngine(goldie.ColoredDiff))
