@@ -30,14 +30,14 @@ func convertUser(u *User) (*domain.User, error) {
 	}
 	ca := time.Time{}
 	if u.CreatedAt != "" {
-		ca, err = parseStrTimeJST(u.CreatedAt)
+		ca, err = parseStrTime(u.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
 	}
 	ua := time.Time{}
 	if u.UpdatedAt != "" {
-		ua, err = parseStrTimeJST(u.UpdatedAt)
+		ua, err = parseStrTime(u.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -69,20 +69,20 @@ func convertBook(b *Book) (*domain.Book, error) {
 	if err != nil {
 		return nil, fmt.Errorf("priceの数値変換に失敗:%w", err)
 	}
-	page, err := strconv.Atoi(strings.ReplaceAll(b.Price, ",", ""))
+	page, err := strconv.Atoi(strings.ReplaceAll(b.Page, ",", ""))
 	if err != nil {
 		return nil, fmt.Errorf("pageの数値変換に失敗:%w", err)
 	}
-	ca := time.Time{}
+	ca := time.Now()
 	if b.CreatedAt != "" {
-		ca, err = parseStrTimeJST(b.CreatedAt)
+		ca, err = parseStrTime(b.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
 	}
-	ua := time.Time{}
+	ua := time.Now()
 	if b.UpdatedAt != "" {
-		ca, err = parseStrTimeJST(b.UpdatedAt)
+		ca, err = parseStrTime(b.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -113,8 +113,8 @@ func tweakUserForJSON(u *domain.User) *User {
 		AuthUserId: fmt.Sprint(u.AuthUserId),
 		Email:      fmt.Sprint(u.Email),
 		Password:   u.Password.String(),
-		CreatedAt:  parseTimeJST(u.CreatedAt),
-		UpdatedAt:  parseTimeJST(u.UpdatedAt),
+		CreatedAt:  u.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:  u.UpdatedAt.Format(time.RFC3339),
 	}
 }
 
@@ -139,8 +139,8 @@ func tweakBooksForJSON(books []*domain.Book) []*Book {
 			Price:      fmtx.Sprint(book.Price),
 			BookStatus: string(book.BookStatus),
 			AuthUserId: book.AuthUserId,
-			CreatedAt:  parseTimeJST(book.CreatedAt),
-			UpdatedAt:  parseTimeJST(book.UpdatedAt),
+			CreatedAt:  book.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:  book.UpdatedAt.Format(time.RFC3339),
 		}
 		updateBooks[i] = b
 	}
@@ -182,16 +182,10 @@ func tweakChartsForJSON(chs []*domain.Chart) []*Chart {
 	return charts
 }
 
-// time.TimeのTZをJSTに固定し、RFC3339形式で出力するヘルパー関数。
-func parseTimeJST(t time.Time) string {
-	jst := time.FixedZone("Asia/Tokyo", 9*60*60)
-	return t.In(jst).Format(time.RFC3339)
-}
-
-// timeの文字列に対してTZをJSTに固定し、RFC3339形式で出力するヘルパー関数。
-func parseStrTimeJST(s string) (time.Time, error) {
-	jst := time.FixedZone("Asia/Tokyo", 9*60*60)
-	t, err := time.ParseInLocation(time.RFC3339, s, jst)
+// RFC3339形式のtime文字列をtime.Time型に変換するヘルパー関数。
+// 引数sにはRFC3339形式(例."2006-01-02T15:04:05Z07:00")の文字列を入れる。
+func parseStrTime(s string) (time.Time, error) {
+	t, err := time.Parse(time.RFC3339, s)
 	if err != nil {
 		return time.Time{}, utils.NewErrChains(ErrFailParse, err)
 	}

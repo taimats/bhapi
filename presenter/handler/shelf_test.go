@@ -84,8 +84,8 @@ func TestGetShelfWithAuthUserId(t *testing.T) {
 		Price:      980,
 		BookStatus: domain.Read,
 		AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
-		CreatedAt:  cl.NowJST(),
-		UpdatedAt:  cl.NowJST(),
+		CreatedAt:  cl.Now(),
+		UpdatedAt:  cl.Now(),
 	}
 	testutils.InsertTestData(ctx, t, bundb, book)
 

@@ -30,6 +30,11 @@ func (sr *Shelf) FindBooksByAuthUserID(ctx context.Context, authUserId string) (
 		return nil, err
 	}
 
+	for _, b := range books {
+		b.CreatedAt = b.CreatedAt.Local()
+		b.UpdatedAt = b.UpdatedAt.Local()
+	}
+
 	return books, nil
 }
 

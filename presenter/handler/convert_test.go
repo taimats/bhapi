@@ -23,8 +23,8 @@ func TestTweakBooksForJSON(t *testing.T) {
 			Price:      8800,
 			BookStatus: domain.Bought,
 			AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
-			CreatedAt:  cl.NowJST(),
-			UpdatedAt:  cl.NowJST(),
+			CreatedAt:  cl.Now(),
+			UpdatedAt:  cl.Now(),
 		},
 	}
 	want := []*Book{
@@ -38,8 +38,8 @@ func TestTweakBooksForJSON(t *testing.T) {
 			Price:      "8,800",
 			BookStatus: "bought",
 			AuthUserId: "c0cc3f0c-9a02-45ba-9de7-7d7276bb6058",
-			CreatedAt:  cl.NowJSTString(),
-			UpdatedAt:  cl.NowJSTString(),
+			CreatedAt:  cl.NowString(),
+			UpdatedAt:  cl.NowString(),
 		},
 	}
 
