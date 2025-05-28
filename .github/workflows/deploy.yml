@@ -63,7 +63,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ${{ secrets.SERVER_EXECUTE_DIR }}
-            kill INT $(pidof ${{ secrets.SERVER_EXECUTE_PATH }})
+            kill -INT $(pidof ${{ secrets.SERVER_EXECUTE_PATH }})
             screen -S bhapi -X quit
             sudo chmod +x ${{ secrets.SERVER_EXECUTE_PATH }}
             screen -S bhapi -dm && screen -S bhapi -X stuff "${{ secrets.SERVER_EXECUTE_PATH }}\r"
