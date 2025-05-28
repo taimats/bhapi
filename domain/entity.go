@@ -4,9 +4,9 @@ import (
 	"time"
 
 	"github.com/uptrace/bun"
+	"golang.org/x/crypto/bcrypt"
 )
 
-// 価格全般
 type Password string
 type Email string
 type BookStatus string
@@ -86,6 +86,24 @@ type Chart struct {
 	BookId     int64      `bun:"book_id,nullzero,notnull" json:"bookId,omitempty"`
 	CreatedAt  time.Time  `bun:",nullzero,notnull,default:current_timestamp" json:"createdAt,omitempty"`
 	UpdatedAt  time.Time  `bun:"updated_at,nullzero,notnull,default:current_timestamp" json:"updatedAt,omitempty"`
+}
+
+// パスワードをハッシュ化する。内部でbcryptパッケージを使用しており、Costはデフォルトの10で固定。
+// errorはbcryptパッケージのエラーに一致する（この関数自体の独自エラーはなし）。
+func (u *User) HashedPassword(pw Password) (Password, error) {
+	hp, err := bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return Password(hp), nil
+}
+
+// 入力されたパスワード(raw)がハッシュ化されたパスワードに一致するかを検証。
+func (u *User) ValidatePassword(raw Password) bool {
+	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(raw)); err != nil {
+		return false
+	}
+	return true
 }
 
 func NewChartsFromBook(book *Book) []*Chart {
