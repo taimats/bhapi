@@ -10,25 +10,15 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+
 	"github.com/taimats/bhapi/controller"
 	"github.com/taimats/bhapi/infra"
 	"github.com/taimats/bhapi/infra/repository"
 	"github.com/taimats/bhapi/presenter/handler"
-	"github.com/taimats/bhapi/presenter/middleware/auth"
-	"github.com/taimats/bhapi/presenter/middleware/loggers"
+	"github.com/taimats/bhapi/presenter/middleware"
 	"github.com/taimats/bhapi/utils"
-)
-
-var (
-	allowedOrigins = []string{os.Getenv("FRONT_API_BASE_URL")}
-	allowedMethods = []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete}
-	allowedHeaders = []string{echo.HeaderContentType, echo.HeaderAuthorization}
-
-	AuthSkippedPaths = map[string]struct{}{"/v1/health": {}, "/v1/health/db": {}}
 )
 
 func main() {
@@ -64,50 +54,17 @@ func main() {
 	sbc := controller.NewSearchBooks()
 	hc := controller.NewHealthDB(db)
 
-	e := echo.New()
+	//hanlderの生成
+	h := handler.NewHandler(uc, cc, rc, sc, sbc, hc)
 
-	//echoのmiddlewareの設定
-	home, err := os.UserHomeDir()
-	if err != nil {
-		log.Println(err)
-	}
-	l, w := loggers.NewLogger(fmt.Sprintf("%s/bhapi/logs/app.log", home))
+	//echoの生成
+	e, w := middleware.SetAll(echo.New())
 	defer func() {
 		if err := w.Close(); err != nil {
 			log.Println(err)
 		}
 	}()
-	e.Use(middleware.Recover())
-	e.Use(middleware.RequestLoggerWithConfig(
-		loggers.NewRequestLoggerConfig(l),
-	))
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: allowedOrigins,
-		AllowMethods: allowedMethods,
-		AllowHeaders: allowedHeaders,
-	}))
-	e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
-		Skipper: func(c echo.Context) bool {
-			_, ok := AuthSkippedPaths[c.Request().URL.Path]
-			return ok
-		},
-
-		KeyLookup:  "header:" + echo.HeaderAuthorization,
-		AuthScheme: "Bearer",
-		Validator: func(key string, c echo.Context) (bool, error) {
-			ok, err := auth.Authenticate(key)
-			return ok, err
-		},
-	}))
-	e.Validator = handler.NewCustomValidator(validator.New())
-
-	//echoのhanlderの設定
-	server := handler.NewHandler(uc, cc, rc, sc, sbc, hc)
-	handler.RegisterHandlersWithBaseURL(e, server)
-
-	//graceful shutdownの設定
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer stop()
+	handler.RegisterHandlersWithBaseURL(e, h)
 
 	//サーバーの起動
 	address := fmt.Sprintf("%v:%v", os.Getenv("BACK_API_HOST"), os.Getenv("BACK_API_PORT"))
@@ -116,6 +73,8 @@ func main() {
 			e.Logger.Fatalf("サーバーの起動に失敗:%w", err)
 		}
 	}()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
 
 	//サーバーのシャットダウンの処理
 	<-ctx.Done()
@@ -124,6 +83,5 @@ func main() {
 	if err = e.Shutdown(ctx); err != nil {
 		e.Logger.Fatalf("サーバーのシャットダウンに失敗:%w", err)
 	}
-
 	log.Println("サーバーが正常にシャットダウンしました")
 }

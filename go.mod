@@ -21,6 +21,7 @@ require (
 	github.com/uptrace/bun/extra/bundebug v1.2.11
 	golang.org/x/crypto v0.38.0
 	golang.org/x/text v0.25.0
+	golang.org/x/time v0.11.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
@@ -105,7 +106,6 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/net v0.40.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/time v0.11.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	mellium.im/sasl v0.3.2 // indirect
 )
