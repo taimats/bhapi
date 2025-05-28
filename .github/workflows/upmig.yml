@@ -37,7 +37,6 @@ jobs:
             username: ${{ secrets.SERVER_USERNAME }}
             key: ${{ secrets.SSH_PRIVATE_KEY }}
             port: ${{ secrets.SSH_PORT }}
-            rm: true
             source: "infra/migrations"
             target: ${{ secrets.SERVER_MIGRATION_DIR }}
         
