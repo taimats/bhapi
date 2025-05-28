@@ -31,8 +31,8 @@ func (sr *Shelf) FindBooksByAuthUserID(ctx context.Context, authUserId string) (
 	}
 
 	for _, b := range books {
-		b.CreatedAt = b.CreatedAt.Local()
-		b.UpdatedAt = b.UpdatedAt.Local()
+		b.CreatedAt = b.CreatedAt.Local().In(utils.JST)
+		b.UpdatedAt = b.UpdatedAt.Local().In(utils.JST)
 	}
 
 	return books, nil

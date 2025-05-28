@@ -33,8 +33,8 @@ func (ur *User) FindUserByAuthUserId(ctx context.Context, authUserId string) (*d
 		}
 	}
 
-	user.CreatedAt = user.CreatedAt.Local()
-	user.UpdatedAt = user.UpdatedAt.Local()
+	user.CreatedAt = user.CreatedAt.In(utils.JST)
+	user.UpdatedAt = user.UpdatedAt.In(utils.JST)
 
 	return user, nil
 }
