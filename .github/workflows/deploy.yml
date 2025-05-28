@@ -64,8 +64,8 @@ jobs:
           script: |
             cd ${{ secrets.SERVER_EXECUTE_DIR }}
             sudo chmod +x ${{ secrets.SERVER_EXECUTE_PATH }}
-            echo "現在のディレクトリ:$(pwd)"
-            nohup ${{ secrets.SERVER_EXECUTE_PATH }} & > "${HOME}/app_$(date '+%Y_%m_%d_%H:%M:%S').log" && sleep 5 && rm .env && exit
+            screen -S bhapi -dm && screen -S bhapi -X stuff "${{ secrets.SERVER_EXECUTE_PATH }}\r"
+            sleep 5 && rm .env
     
 
 
