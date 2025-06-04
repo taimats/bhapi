@@ -58,12 +58,7 @@ func main() {
 	h := handler.NewHandler(uc, cc, rc, sc, sbc, hc)
 
 	//echoの生成
-	e, w := middleware.SetAll(echo.New())
-	defer func() {
-		if err := w.Close(); err != nil {
-			log.Println(err)
-		}
-	}()
+	e := middleware.SetAll(echo.New())
 	handler.RegisterHandlersWithBaseURL(e, h)
 
 	//サーバーの起動
